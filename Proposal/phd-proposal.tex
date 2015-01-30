@@ -94,33 +94,53 @@
 
 \maketitle
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{abstract}
-Abstract goes here\ldots
-\end{abstract}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \section{Introduction}
 The field of swarm intelligence is relatively new one, having become more prominent over the past two decades. As such, it incorporates knowledge from older, well established subjects such as biology (insect colonies and evolutionary biology), mathematics (cellular automata and game theory), robotics (sensor networks and distributed systems), and artificial intelligence (learning algorithms and neural networks). This has led to novel approaches in the design and analysis of multi-agent systems (MAS) and the algorithms associated with them. It has spawned an entirely new field of research called \emph{Swarm Robotics}\cite{Sahin2005}, which has led to a large number of robotic platforms, algorithms, and analyis tools \cite{Brambilla2013}.
 
 Swarm systems have many benefits over traditional, centralized robot systems. The robots used in swarm applications are generally many orders of magnitude smaller (\emph{cm} vs.~\emph{m}, \emph{grams} vs.~\emph{kg}) and simpler in design ($<10$ vs.~$100$s of actuators) than conventional robots, while being much greater in number ($10^2$ to $10^{<<23}$). Also, most swarm systems are homogeneous---robots with identical software/hardware are used to complete the assigned task. This makes swarm systems easily scalable while simultaneously keeping manufacturing and maintenance costs of the hardware low. Though, perhaps their greatest advantage is system stability and robustness to error. Most swarm systems consist of small, relatively simple robots that are only capable of limited and noisy sensing, communication and actuation. This means that while no single robot alone is capable of performing the task assigned, the system as a whole is resilient to individual unit errors and is capable of completing the task \cite{Winfield2005}.
 
-In order to make swarms an alternative engineering approach---in which robustness emerges despite predictable, individual failure---we require formal tools that allow us to predict and verify the resulting complex behavior. Developing such tools goes hand-in-hand with investigating novel hardware (Figure \ref{fig:swarmbots}), simulation tools \cite{Michel1998}, and tracking tools \cite{correlliros06,lochmatter08} that ease conducting large numbers of experiments with large numbers of robots. Analyzing swarm dynamics on a higher abstraction level allows us to explore the design space much faster, but also to use parameter analysis and numerical methods for optimization and verification. 
-
 Swarm robotics has tackled a vast array of MAS problems in the past two decades. It's corpus ranges from self-organization, self-assembly, pattern formation, and aggregation to foraging, coordinated movement (such as flocking and schooling), and group surveillance. Performing collaborative tasks is a vast sub-field of study in swarm robotics and a considerable work has been done to understand and model such scenarios, particularly by Ijspeert and Martinoli using the well known stick-pulling experiments. Collaborative tasks using MAS extend to a variety of potential real-world applications such as oil-spill containment, firefighting (particularly large forest fires), object transport, and group surveillance and, as such, form an important subclass of problems to study and analyze. Am important question that has so far remained unanswered when attempting collaborative tasks is how many agents are required to complete a given task of a certain size and how are they recruited? It is often assumed that all robots are pre-programmed to form groups of a particular size beforehand or that the task requires an \emph{exact} number of robots to complete successfully---a number that is known beforehand. But what about tasks that are dynamic in nature such as containment of forest fires? In  such cases it is impractical and often impossible to known beforehand, exactly how many agents are required for successful completion. It is for such situations that I propose a novel methodology for estimating group sizes in a distributed fashion, as described by my thesis statement below.
 
 \section{Thesis Statement}
 \begin{quote}
-My goal is to provide a fully distributed methodology for estimating appropriate team sizes required to complete dynamic tasks using a swarm of robots. I will analyze this methodology using tools from game theory to provide theorems on overall efficiency and resultant group behavior while supporting these claims using numerical and physics-based simulations as well as real robot experiments using the \emph{Droplet} Swarm Robot platform.
+My goal is to provide a fully distributed methodology for estimating appropriate team sizes required to complete dynamic tasks using a multi-agent system. I will analyze this methodology using tools from various disciplines to provide theorems on overall efficiency and resultant group behavior while supporting these claims using numerical and physics-based simulations as well as real robot experiments using the \emph{Droplet} Swarm Robot platform.
 \end{quote}
 
-My approach to solving the problem of group size estimation differs from existing approaches in swarm robotics that are often constrained by the inherent physical and memory limitations of small, simplistic robots. Applications of MAS to real-world scenarios is lacking today because many of the existing swarm robot platforms are exceedingly simplistic and are not capable of handling complex tasks such as rough terrain traversal, carrying heavy objects, long-distance communication, etc. that are required for tackling actual situations. While the focus of my research is not on hardware design (far from it!), I aspire to develop a more adaptable and mathematically rigorous solution for group size estimation and recruitment that is oblivious to the physical restrictions of a robotic platform and works in almost all MAS settings. The only assumptions I make reasonably are that whatever hardware my algorithms run on is capable (however imperfectly) of the four basic requirements of robotics; actuation, sensing, communication and computation.
+This approach to solving the problem of group size estimation differs from existing approaches in swarm robotics that are often constrained by the inherent physical and memory limitations of small, simplistic robots. Applications of MAS to real-world scenarios is lacking today because many of the existing swarm robot platforms are exceedingly simplistic and are not capable of handling complex tasks such as rough terrain traversal, carrying heavy objects, long-distance communication, etc. that are required for tackling actual situations. While the focus of my research is not on hardware design (far from it!), I aspire to develop a more adaptable and mathematically rigorous solution for group size estimation and recruitment that is oblivious to the physical restrictions of a robotic platform and works in almost all MAS settings. The only assumptions I make reasonably are that whatever hardware my algorithms run on is capable (however imperfectly) of the four basic requirements of robotics; actuation, sensing, communication and computation.
 
 \section{Related Work}
 
 
-\section{Applications of Game Theory}
+
+\section{Proposed Work}
+In this section I will outline my proposed research work, focusing heavily on two main aspects of my thesis statement; modeling and analysis of swarm systems and my specific work on team size estimation, in that order.
+
+\subsection{Consistent Modeling Methodology for Swarm Robotics}
+The first issue any swarm robotics researcher faces is a distinct lack of established modeling methodology in the field.  This is why review papers is swarm robotics as recent as 2007 \cite{Bayindir2007} still cite modeling as an open research topic for the field. While a number of disconnected methods exist for modeling large swarms, there is currently no unified way of going from actual physical hardware experiments to simulations and models and back. 
+
+In order to make swarms an alternative engineering approach---in which robustness emerges despite predictable, individual failure---we require formal tools that allow us to predict and verify the resulting complex behavior. Developing such tools goes hand-in-hand with investigating novel hardware (Figure \ref{fig:swarmbots}), simulation tools \cite{Michel1998}, and tracking tools \cite{correlliros06,lochmatter08} that ease conducting large numbers of experiments with large numbers of robots. Analyzing swarm dynamics on a higher abstraction level allows us to explore the design space much faster, but also to use parameter analysis and numerical methods for optimization and verification.
+
+For this purpose, I propose a closed loop system as seen in Fig.~\ref{fig:ssmodel}. Setting up the required swarming task as a real physical experiment or physical simulation allows us to discover and measure the different free parameters in the system. We then use these variables in lower resolution models (micro-level) as well as in the development of mathematical models (macro-level) for our system. These more abstract models allow us to rapidly experiment with system parameters and optimize them. We can then use these optimized parameters back in the real physical experiments to improve the desired behavior of the system and repeat the cycle till the desired level of accuracy and satisfaction of  model behavior is achieved. Finally, we hope to deploy these swarm systems in the real world to tackle real problems using the novel yet algorithmically simple approach that swarm robotics lends us.
+
+\subsubsection{Parameter Estimation Optimization}
+
+
+\subsubsection{A Spatial Modeling Paradigm for Swarm Robotics}
+
+
+\subsection{\emph{Droplet} Hardware and Simulation Platform}
+
+
+\subsection{Collaboration Model using a Sigmoid Threshold Function}
+
+\subsection{Application of Game Theory to MAS}
 One such tool that is becoming increasingly applicable to the field of swarm robotics is \emph{Game Theory}. Being formally introduced in John von Neumann's seminal work, "Zur Theorie der Gesellschaftsspiele" (On Theory of Games and Strategy) in 1928, game theory has since been applied to a vast array of fields such as economics, biology and, more recently, computer science to study the mathematical models of conflict and cooperation between intelligent rational decision-makers.
+
+\subsubsection{Global Games}
+
+
+
+\section{Conclusion}
 
 % Bibliography
 %\nocite{*} % Show all Bib-entries
