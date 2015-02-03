@@ -118,10 +118,6 @@ My goal is to provide a fully distributed methodology for estimating appropriate
 
 This approach to solving the problem of group size estimation differs from existing approaches in swarm robotics that are often constrained by the inherent physical and memory limitations of small, simplistic robots. Applications of MAS to real-world scenarios is lacking today because many of the existing swarm robot platforms are exceedingly simplistic and are not capable of handling complex tasks such as rough terrain traversal, carrying heavy objects, long-distance communication, etc. that are required for tackling actual situations. While the focus of my research is not on hardware design (far from it!), I aspire to develop a more adaptable and mathematically rigorous solution for group size estimation and recruitment that is oblivious to the physical restrictions of a robotic platform and works in almost all MAS settings. The only assumptions I make reasonably are that whatever hardware my algorithms run on is capable (however imperfectly) of the four basic requirements of robotics; actuation, sensing, communication and computation.
 
-\section{Related Work}
-
-
-
 \section{Proposed Work}
 In this section I will outline my proposed research work, focusing heavily on two main aspects of my thesis statement; modeling and analysis of swarm systems and my specific work on team size estimation, in that order.
 
@@ -130,32 +126,12 @@ The first issue any swarm robotics researcher faces is a distinct lack of establ
 
 In order to make swarms an alternative engineering approach---in which robustness emerges despite predictable, individual failure---we require formal tools that allow us to predict and verify the resulting complex behavior. Developing such tools goes hand-in-hand with investigating novel hardware (Figure \ref{fig:swarmbots}), simulation tools \cite{Michel1998}, and tracking tools \cite{correlliros06,lochmatter08} that ease conducting large numbers of experiments with large numbers of robots. Analyzing swarm dynamics on a higher abstraction level allows us to explore the design space much faster, but also to use parameter analysis and numerical methods for optimization and verification.
 
-For this purpose, I propose a closed loop system as seen in Fig.~\ref{fig:ssmodel}. Setting up the required swarming task as a real physical experiment or physical simulation allows us to discover and measure the different free parameters in the system. We then use these variables in lower resolution models (micro-level) as well as in the development of mathematical models (macro-level) for our system. These more abstract models allow us to rapidly experiment with system parameters and optimize them. We can then use these optimized parameters back in the real physical experiments to improve the desired behavior of the system and repeat the cycle till the desired level of accuracy and satisfaction of  model behavior is achieved.
+\begin{figure}
+	\centering\includegraphics[width=.75\textwidth]{../assets/ssmodel.png}
+	\centering\caption{}\label{fig:ssmodel}
+\end{figure}
 
-\subsubsection{Parameter Estimation and Optimization}
-One of the major advantages of the methodology described above is the ability to identify and optimize important system parameters. We can re-write the PDM equations in~\eqref{eq:rateeqns} as,
-\begin{equation}
-S'(\theta,\mu,t) = \Gamma\left(\vec{S}, \theta, \mu, t\right)
-\end{equation}
-So the temporal evolution of a model is characterized by its state in the past, $\vec{S}(t)$, partially known system parameters ($\theta$), robot control parameters ($\mu$), and time. In other words, the probabilities in eq.\eqref{eq:rateeqns} and eq.\eqref{eq:master} need not be constant values but functions of $\theta$, $\mu$, and $t$.
-
-Two situations commonly arise when designing macro-level models for swarm systems. Firstly, there is the problem of identifying the important system parameters, $\theta$. As pointed out in\cite{Correll2008}, \emph{``In a real robotic system, not all of the model parameters can be known beforehand, either due to uncertainty of measurements or because the chosen model oversimplifies the system (e.g., ignoring friction or sensor noise).''} As such, these parameters are estimated from observations of real experiments and require solving the following optimization problem.
-\begin{equation}
-	\theta^* = \underset{\overline{\theta}}{\argmin}\left(S^*(\overline{\theta},\mu) - \hat{S}^*(\theta, \mu)\right)^2 \label{eq:thetaopt}
-\end{equation}
-$S^*(\overline{\theta},\mu)$ is the model prediction of the state vector at steady-state,\\ i.e.~$S^*(\overline{\theta},\mu) = \lim_{t \to \infty}S(\overline{\theta},\mu, t)$, and $\hat{S}^*(\theta, \mu)$ is the experimentally observed state vector at steady-state.
-
-The second situation involves finding optimal control parameters, $\mu$, for a known set of system parameters, $\theta$. The goal is to drive the system towards a desired steady-state distribution, $\tilde{S}^*$, by tuning the model's control parameters. The is accomplished by solving the following optimization problem.
-\begin{equation}
-	\mu^* = \underset{\overline{\mu}}{\argmin}\left(\tilde{S}^* - S^*(\theta, \overline{\mu})\right)^2 \label{eq:muopt}
-\end{equation}
-
-It is evident from eq.\eqref{eq:thetaopt} and eq.\eqref{eq:muopt} that these separate optimization problems are not independent. Starting with initial guesses $\mu(0)$ and $\theta(0)$ alongside simulation results from these guesses, we generate increasingly better values of $\theta$ and $\mu$ for our desired final state distribution $\tilde{S}^*$ using the following recurrence relations.
-\begin{align}\label{eq:paramrel}
-	\overline{\theta}(n + 1) = & \underset{\overline{\theta}}{\argmin}\sum\limits_{i=0}^{n}\left(S^*(\overline{\theta},\overline{\mu}(i)) - \hat{S}^*(\theta, \overline{\mu}(i), i)\right)^2\\
-	\overline{\mu}(n + 1) = & \underset{\overline{\mu}}{\argmin}\left(\tilde{S}^* - S^*(\overline{\theta}(n + 1), \mu)\right)^2
-\end{align}
-The index $n$ corresponds to the number of the experiment that led to an observation of the steady state $\hat{S}^*(\theta, \mu, n)$. Further discussion and applications of this parameter optimization approach are discussed in\cite{Correll2006a,Correll2008}.
+For this purpose, I propose a closed loop system as seen in Fig.~\ref{fig:ssmodel}. Setting up the required swarming task as a real physical experiment or physical simulation allows us to discover and measure the different free parameters in the system. We then use these variables in lower resolution models (micro-level) as well as in the development of mathematical models (macro-level) for our system. These more abstract models allow us to rapidly experiment with system parameters and optimize them. We can then use these optimized parameters back in the real physical experiments to improve the desired behavior of the system and repeat the cycle till the desired level of accuracy and satisfaction of model behavior is achieved. A closed loop modeling methodology also allows us to identify and optimize important system parameters as described in \cite{Correll2006a,Correll2008}.
 
 \subsubsection{A Spatial Modeling Paradigm for Swarm Robotics}
 Perhaps the simplest way to model a physical system is to write out the equations of motion associated with each individual agent in the system. This approach has been applied in some cases such as animal herding\cite{Correll2008b} where a relatively small number of agents are involved. 
@@ -168,14 +144,7 @@ The central strategy used in spatial modeling of swarm systems involves the use 
 \begin{equation}
 	m \frac{d\dot{x}}{dt} = \mathcal{F} + F' - \alpha\dot{x}
 \end{equation}
-Where $\mathcal{F}$ are the forces exerted on the particle at a macroscopic level, $F'$ are the small micro-level fluctuations whose ensemble average $\left<F'\right> = 0$. The final negative term $\alpha\dot{x}$ accounts for friction forces or viscous drag experienced by the large particle during motion.
-
-It is important to note that the Langevin equation is any differential equation that describes the temporal and spatial evolution of a subset of the degrees of freedom of a particle, i.e. it is not a single equation but a class of equations that all describe the same phenomenon. The original equation for a Brownian agent did not take into consideration the case where an agent could move due to some internal driving force, as robots do. A derivation from Langevin's original equation to the modified form seen below is available in Hamann's dissertation work\cite{Hamann2010}.
-\begin{equation}\label{eq:lan}
-\V{R}'(t) = -\V{A}(\V{R}(t),t) + B(\V{R}(t),t)\V{F}(t)
-\end{equation}
-
-In Eqn.~\eqref{eq:lan}, $\V{R}(t)$ represents the position of the agent at time-$t$, $\V{A}(\V{R}(t),t)$ is a direction function describing the agent's deterministic motion, while $B(\V{R}(t),t)\V{F}(t)$ describes the agent's random motion based on $\V{F}$, a stochastic process (white noise). $\V{A}$ is commonly referred to as the \emph{drift} term in the equation and $B$, the \emph{diffusion coefficient}. $\V{F}(t)$ is a normalized noise term ($\norm{\V{F}(t) = 1}$) with 0 mean and is uncorrelated in time ($\left<\V{F}(t)\V{F}(t') = \delta(t - t')\right>$). Using constant values for drift and diffusion in 1 spatial dimension, Figure~\ref{fig:lan} shows the movement of a robot (or particle) solved using Eqn.~\eqref{eq:lan}.
+Where $\mathcal{F}$ are the forces exerted on the particle at a macroscopic level, $F'$ are the small micro-level fluctuations whose ensemble average $\left<F'\right> = 0$. The final negative term $\alpha\dot{x}$ accounts for friction forces or viscous drag experienced by the large particle during motion. It is important to note that the Langevin equation is any differential equation that describes the temporal and spatial evolution of a subset of the degrees of freedom of a particle, i.e. it is not a single equation but a class of equations that all describe the same phenomenon. 
 
 \begin{figure}[!htb]
 \centering\begin{subfigure}{.5\textwidth}
@@ -187,8 +156,7 @@ In Eqn.~\eqref{eq:lan}, $\V{R}(t)$ represents the position of the agent at time-
 \caption{Left: Solution to Langevin equation for a particle in 1D with $\V{A} = 0$, i.e. no drift. Right: Solution with $\V{A} = 0.1$. In both cases the diffusion coefficient is constant, $B = 0.3$, and $\V{F}$ uses an uncorrelated normal distribution with mean $\left<\V{F}\right> = 0$.}\label{fig:lan}
 \end{figure}
 
-\subsection{Fokker-Planck Equation: A Macroscopic Model}
-From the Langevin equation used in the previous section, we can derive the Fokker-Planck equation as stated below,
+From the Langevin equation above, we can derive the macro-level Fokker-Planck equation as stated below,
 \begin{equation}
 \PD{\rho(\V{r},t)} = -\nabla(\V{A}(\V{r},t)\rho(\V{r},t))+\frac{1}{2}Q\nabla^2(B^2(\V{r},t)\rho(\V{r},t))
 \end{equation}
@@ -199,40 +167,26 @@ From the Langevin equation used in the previous section, we can derive the Fokke
 
 A clear and concise derivation of the above equation from the Langevin equation is provided in section 4.1 of \cite{Hamann2010}, which in turn follows closely from the book \emph{Synergetics} by Haken (1977). The terms $\V{A}$, $B$ and $\V{F}$ reprise their earlier roles from the Langevin equation, while $Q$ is a new displacement term due to collisions between particles. $\rho(\V{r}, t)$ is the probability of encountering a particle at position $\V{r}$ and time $t$. As one can see, the Fokker-Planck equation gives us a \emph{probability distribution} of the positions of particles in space, making it a viable macroscopic model compared to the micro-level Langevin equation which gives us the \emph{position} of a \emph{single} particle in space (see Figure~\ref{fig:fokkerplanck}).
 
-\subsection{Applications}
 The Fokker Planck equation is a relatively new tool in the field of swarm robot modeling and has notably been used by Hamann\cite{Hamann2008,Hamann2010}, as well as Prorok, Correll and Martinoli\cite{Prorok2011} in their work on boundary coverage and inspection of jet-turbine engines using swarms of miniature robots. They used a hybrid approach for modeling collective inspection that involves a probabilistic non-spatial model coupled with spatial micro-macro diffusion equations for modeling collective inspection of regular structures to improve consensus with observed experimental values. 
 
 \begin{figure}[!htb]
-\centering\includegraphics[width=8.5cm]{../assets/spatSignal.png}
+\centering\includegraphics[width=.75\textwidth]{../assets/spatSignal.png}
 \centering\caption{Experiment setup for centralized robot population control experiment proposed by Milutinovi\`{c} and Lima in%\cite{Milutinovi2006}
 .}\label{fig:signal}
 \end{figure}
 
-A spatial model is used in\cite{Milutinovi2006} to control a large scale multi-agent system using centralized controller and three signal sources. The goal of this experiment is to show successful control of a large population of robots by collectively moving them along a 1-dimensional arena using \emph{left}, \emph{right} and \emph{stop} signals from a moving aerial controller. The model accounts for the fact that not all robots receive the signal or change direction/move promptly upon successfully receiving a signal. A visual representation of this setup can be seen in Figure~\ref{fig:signal}.
+A spatial model also is used in\cite{Milutinovi2006} to control a large scale multi-agent system using centralized controller and three signal sources. A visual representation of this setup can be seen in Figure~\ref{fig:signal}.
 
-Although the Fokker-Planck equation is not mentioned explicitly in\cite{Milutinovi2006}, the authors employ the use of a system of PDEs to predict the position of the swarm in the arena via a probability density function (PDF). Their approach is therefore rather similar to the macro-level spatial modeling approach described earlier in this paper. The goal of moving the entire swarm  from point A to point B in a 1D arena just through the use three signals controlled by a centralized controller is formulated as an optimal control problem by the authors. It is solved by introducing appropriate weighting and cost functions to the PDEs and computing the PDF at any given time to predict the collective motion/position of the swarm. The control signals are then switched accordingly to move the swarm in a desired direction. Two particularly insightful plots (Figures 4 \& 5) are provided in\cite{Milutinovi2006} that showcase this result, i.e. the PDF evolution of stopped and moving robot populations as time progresses.
-
-While the non-spatial modeling approaches we have discussed so far use a phenomenological approach to construct the macro-model equations, this is not a viable option in the spatial model case. Typically, the drift and diffusion coefficient functions in the Fokker-Planck equation are adapted based on the swarming task we attempt to model but constructing these functions is not as straightforward as defining the rate equations from a robot controller, as seen in the non-spatial case. The $\V{A}$ and $B$ functions of the Fokker-Planck equation serve to bridge the gap between micro-level and macro-level observations of a swarm system and hence provide quite a challenge to design accurately.
-
-\subsection{\emph{Droplet} Hardware and Simulation Platform}
+\subsubsection{\emph{Droplet} Hardware and Simulation Platform}
 An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach we have seen so far for designing models of robot swarms, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
 
 To be able to accurately recreate a task on a swarm system without investing the substantial time and resources required to develop and deploy real robots, we use physics-based simulators. The point of these simulators is to remain as true to the real world as possible while maintaining an order of magnitude improvement in speed and simplicity over real robot experiments. Unlike micro-models that abstract away physical and environmental issues such as wheel slip, sensor noise, communication delays, etc., using probability and dice rolls, physics-based simulators make the added effort to accurately and dynamically model every minute aspect of the swarm system.
 
-\begin{figure}[!tb]
-\begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/Webots.png}
-\centering\caption{The Webots simulator rendering a game of robot soccer.\footnotemark}\label{fig:gazebo}
-\end{subfigure}~
-\begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/dsim.png}
+\begin{figure}[!htb]
+\centering\includegraphics[width=.75\textwidth]{../assets/dsim.png}
 \centering\caption{The Droplet swarm robot simulator}\label{fig:dropletsim}
-\end{subfigure}
-\caption{}
 \end{figure}
-\footnotetext{Image credit: \texttt{http://www.cyberbotics.com/overview}}
 
-Many robot simulators are currently available today as either standalone programs like Webots and Gazebo (see Figure~\ref{fig:gazebo}). Webots is a widely used simulator in swarm robotics due to its capability to simulate multiple agents and agent-agent/agent-environment interactions in real time. The Webots API also allows for cross-compilation of programs from the simulation environment, right on to real robots without the need for reprogramming and supports a wide range of commercially available robot platforms such as Kilobots, Khepera, Alice, etc. There are also in-house implementations of physics simulators for specific robot platforms, such as the Droplet simulator shown in Figure~\ref{fig:dropletsim}, that build up on physics engines such as Bullet and ODE.
 
 \subsection{Collaboration Model using a Sigmoid Threshold Function}
 I have already studied how sigmoid threshold functions can be used as a voting mechanism in collaboration problems for determining sufficient team size. We can tune the logistic function, as seen below, using two parameters $\tau$ and $\theta$ which map to the mean and variance for desired team sizes, respectively.
