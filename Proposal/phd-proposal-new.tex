@@ -2,15 +2,11 @@
 %2345678901234567890123456789012345678901234567890123456789012345678901234567890
 %        1         2         3         4         5         6         7         8
 
-\documentclass[11pt, onecolumn, compsoc, letterpaper]{article}
+\documentclass[defaultstyle,11pt]{proposal}
 %\usepackage{times}
-
-% Subfiles package
-%\usepackage{subfiles}
 
 % Usual setup packages
 \usepackage{listings} % For including source code with highlighting
-\usepackage{hyperref} % For better hyper-link integration
 \usepackage[bottom]{footmisc} % places footnotes at page bottom
 
 % Packages for verbatim text blocks
@@ -22,6 +18,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
+\newtheorem{proof}{Proof}
 \newtheorem{corollary}{Corollary}
 \newtheorem{proposition}{Proposition}
 \usepackage{amsmath}
@@ -41,39 +38,17 @@
 \usepackage{subcaption}
 \usepackage[table]{xcolor}
 
+% For cleaner citations
+\usepackage{cite}
+
 % Packages for drawing graphs, FSMs, etc.
 \usepackage{pgf}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,calc,fit,positioning,shapes.symbols,shapes.callouts,patterns,automata,matrix}
 
-% Remove red boxes around refs
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=blue
-}
-
-% Squeeze whitespace
-\usepackage{geometry} % to change the page dimensions
-\usepackage[compact]{titlesec}
-\usepackage{titling}
-
-\setlength{\parskip}{0pt}
-\setlength{\parsep}{0pt}
-\setlength{\headsep}{0pt}
-\setlength{\topskip}{0pt}
-\setlength{\topmargin}{0pt}
-\setlength{\topsep}{0pt}
-\setlength{\partopsep}{0pt}
-
-\titlespacing{\section}{0pt}{*3}{*3}
-\titlespacing{\subsection}{0pt}{*2}{*2}
-\titlespacing{\subsubsection}{0pt}{*1}{*1}
-
-\renewcommand{\arraystretch}{1.2}
-\setlength{\droptitle}{-2cm}
+% To keep footnotes on the same page are reference
+\interfootnotelinepenalty=10000
+\raggedbottom
 
 % ------------------------------ CUSTOM MACROS ------------------------------------
 % Nice little macro for adding a comment box. Include incrementing comment numbers.
@@ -107,17 +82,54 @@
 \newcommand{\xm}{x_{\hat{m}}}
 \newcommand{\td}{\mathbf{t}}
 
-% To keep footnotes on the same page are reference
-\interfootnotelinepenalty=10000
-\raggedbottom
 
-\begin{document}
+% ------------------------------ DOCUMENT TITLE SETUP -------------------------
 \title{Optimal Task Assignment in Multi-Agent Systems}
-\author{Anshul Kanakia}
 
-\maketitle
+\author{A.~P.}{Kanakia}
 
-\section{Introduction}
+\otherdegrees{B.S., University of Illinois at Urbana-Champaign, 2010\\
+	      M.S., University of Colorado, Boulder, 2014}
+
+\degree{Doctor of Philosophy}		%  #1 {long descr.}
+	{Ph.D., Computer Science}		%  #2 {short descr.}
+
+\dept{Department of}			%  #1 {designation}
+	{Computer Science}		%  #2 {name}
+
+\advisor{Prof.}				%  #1 {title}
+	{Nikolaus Correll}			%  #2 {name}
+
+\reader{Prof.~Ani Hsieh}		%  2nd person to sign thesis
+\readerThree{Prof.~Behrouz Touri}		%  3rd person to sign thesis
+\readerFour{Prof.~Gabe Sibley}
+\readerFive{Prof.~Sriram Sankaranarayanan}
+
+\abstract{  \OnePageChapter	% because it is very short
+
+	Abstract goes here\ldots
+	}
+
+\dedication[Dedication]{	% NEVER use \OnePageChapter here.
+	TBD
+	}
+
+\acknowledgements{	\OnePageChapter	% *MUST* BE ONLY ONE PAGE!
+	TBD
+	}
+
+%\ToCisShort	% use this only for 1-page Table of Contents
+
+%\LoFisShort	% use this only for 1-page Table of Figures
+% \emptyLoF	% use this if there is no List of Figures
+
+%\LoTisShort	% use this only for 1-page Table of Tables
+ \emptyLoT	% use this if there is no List of Tables
+
+% ----------------------------- BEGIN DOCUMENT --------------------------------
+\begin{document}
+%\maketitle
+\chapter{Introduction}
 Many social, biological and physical systems can be represented as swarm systems. From modeling human societal interaction and population dynamics to insect colonies and great animal herd migrations, from cellular automata to distributed network systems and even the interconnected computing devices that form the internet---which is the collective sum of human knowledge today---can be viewed as swarm intelligence. \emph{Swarm Robotics} \cite{Sahin2005} is a branch of swarm intelligence applied to physical multi-agent systems (MAS) to leverage the advantage of producing emergent, complex behavior from individually simplistic agents and rules. This has led to novel approaches in the design and analysis of MAS and the algorithms associated with them \cite{Brambilla2013}.
 
 Swarm systems have many benefits over traditional, centralized robot systems. The robots used in swarm applications are generally many orders of magnitude smaller (\emph{cm} vs.~\emph{m}, \emph{grams} vs.~\emph{kg}) and simpler in design ($<10$ vs.~$100$s of actuators) than conventional robots, while being much greater in number ($10^2$ to $10^{<<23}$). Also, most swarm systems are homogeneous---robots with identical software/hardware are used to complete the assigned task. This makes swarm systems easily scalable while simultaneously keeping manufacturing and maintenance costs of the hardware low. Though, perhaps their greatest advantage is system stability and robustness to error. Most swarm systems consist of small, relatively simple robots that are only capable of limited and noisy sensing, communication and actuation. This means that while no single robot alone is capable of performing the task assigned, the system as a whole is resilient to individual unit errors and is capable of completing the task \cite{Winfield2005}.
@@ -145,7 +157,7 @@ Empirical evidence from biological systems suggests that there exists a generali
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Response Threshold Model for MAS Collaboration}\label{sec:expsetup}
+\chapter{Response Threshold Model for MAS Collaboration}\label{sec:expsetup}
 We consider a generic collaboration task with $m$ uniformly distributed collaboration sites within a flat arena with area $A$. A swarm of individually simple robots such as the \emph{Droplet} platform \cite{Farrow14,Klingner14} is deployed within the arena, uniformly and at random. The number of robots being used per experiment varies, as we discuss results for a number of different scenarios. Collaboration sites in the arena can be of various sizes and configurations.
 
 Each individual agent is capable of locomotion \cite{Klingner14} and local sensing \cite{Farrow14}. The agents do not require global positioning and no centralized controller exists, but we assume each agent to be capable of local omnidirectional communication with other agents within its communication range. The agents are also capable of sensing the boundary of a collaboration site---we assume that sites have easily distinguishable boundary regions, as shown in Fig.~\ref{fig:setup}, for the purposes of the model studied in this paper. 
@@ -197,10 +209,10 @@ Note that the proposed response threshold function is different from \cite{Bonab
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Macroscopic analysis}\label{sec:macromodel}
+\section{Macroscopic analysis}\label{sec:macromodel}
 In this section we study how the local parameters $\tau$ and $\theta$ from an individual agent's sigmoid threshold function affect formation of groups of different sizes at the macroscopic system level.
 
-\subsubsection{A general model of probabilistic task allocation}
+\subsection{A general model of probabilistic task allocation}
 Equation \eqref{eq:sig} is a cumulative probability density function approaching $1.0$ as the number of agents approaches infinity, that is $\lim_{x \to \infty}\sig(x)=1$. For $\theta \to \infty$, equation \eqref{eq:sig} approximates the unit step:
 \begin{equation}
 \lim_{\theta \to \infty} \frac{1}{1+e^{\theta(\tau-\xm)}}\approx
@@ -214,7 +226,7 @@ Equation \eqref{eq:sig} is a cumulative probability density function approaching
 \end{equation}
 Although, unlike the unit step function, the limit on the left in \eqref{eq:siglim} is always continuous, even at $\xm = \tau$ where the value of the sigmoid is $1/2$. The proposed model is therefore a generalization of the ``stick-pulling'' task allocation model with deterministic team size \cite{Lerman2001}, allowing us to tune the variable resulting group sizes using the tuning parameters $\tau$ and $\theta$ in \eqref{eq:sig}. 
 
-\subsubsection{From individual choices to team-level collaboration}
+\subsection{From individual choices to team-level collaboration}
 Assuming the agents to be loosely synchronized, e.g., by considering decisions within a finite window of time, determining a majority vote corresponds to a Bernoulli trial with each agent flipping a biased coin---the bias being computed using the sigmoid function---to decide whether or not to collaborate in the next time step. The probability that exactly $k$ agents collaborate from a population of $n$ agents at a collaboration site is given by the probability mass function (PMF) of a Binomial distribution.
 \begin{equation}
 	B(n, k) = \binom{n}{k}\sig(n)^{k}\left(1 - \sig(n)\right)^{n - k}\label{eq:binomial}
@@ -237,7 +249,7 @@ A caveat of \eqref{eq:normalcdf} is that the Normal approximation yields poor re
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Microscopic Model}\label{sec:micromodel}
+\section{Microscopic Model}\label{sec:micromodel}
 As the proposed collaboration mechanism are strongly non-linear, we chose microscopic stochastic simulations to explore the underlying dynamics of the system. The approach followed to build the stochastic Gillespie simulation of the system is as follows.
 \begin{itemize}
 \item Perform random walk till a collaboration site is found (\emph{search} state).
@@ -307,7 +319,7 @@ For both experiments a single collaboration site is used and each run simulates 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Results}
+\section{Results}
 \begin{figure*}[!htb]
 \begin{subfigure}{0.33\textwidth}
 \centering\includegraphics[width=1.0\textwidth]{../assets/LermanCollabCompare3.png}
@@ -382,7 +394,7 @@ To account for the vision software's detection errors, the raw data gathered fro
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Discussion}\label{sec:discussion}
+\section{Discussion}\label{sec:discussion}
 Results in Figures \ref{fig:lercol}, \ref{fig:collabsweep} and \ref{fig:meansvars} show that the proposed threshold-based task allocation mechanism is a generalization of the deterministic Lerman model in that it allows to approach what is seen with deterministic group sizes while retaining the elasticity to vary group sizes along any desired range of values. Also, these plots show how altering microscopic control parameters within the agents, $\theta$ and $\tau$ of their sigmoid functions, directly affects macroscopic behavior of the swarm system by altering means and variances of formed group sizes, respectively. Although the matching between microscopic results and macroscopic prediction is not perfect due to the discrete approximation, the plots show that a wide range of means and variances are feasible. Finding appropriate parameters to reach these could be easily achieved using a suitable optimization framework such as presented in \cite{Correll2008,Berman2009}, using the macroscopic predictions as initial estimate. 
 
 The proposed task allocation algorithm requires an estimate of the group size at each collaboration site as well as the ability to communicate with the group in order to reach a consensus. While these assumptions seem to be limiting at first sight, they can be rolled into the analysis process and possibly exploited to design the task allocation process. For example, an increasing variance for observing the group size $\tau$ or noise in the consensus process simply increase the variance of the task allocation process and could therefore be countered---to some extent---by altering the properties of the response threshold function. 
@@ -398,14 +410,14 @@ In practice, effective collaboration rates will also be limited by the embodimen
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task-Assignment}
-\subsection{Global Games: A Brief Overview}\label{sec:ggoverview}
+\chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task-Assignment}
+\section{Global Games: A Brief Overview}\label{sec:ggoverview}
 Game theory is the study of strategic interactions among multiple agents or players, such as robots, people, firms, etc.\ where the decision of each party affects the payoff of the rest. A fundamentally important class of games is one with incomplete or imperfect information where each agent's utility depend not only on the actions of the other agents, but also on an underlying fundamental signal that cannot be accurately ordained by the agents. The class of global games with incomplete information was originally introduced in \cite{Carlsson1993} where two players are playing a game and the utility of the two players depends on an underlying fundamental signal $\tau \in \mathbb{R}$, but each agent observes a noisy variation of this signal, $x_i$. Returning to our previous example of firefighting, this fundamental signal $\tau$ is the \emph{magnitude} of the task of putting out the fire, i.e., the number of robots needed to do so. The size and intensity of the fire, along with environmental and other site-specific factors all play a major role in determining whether an agent should begin the task or wait for more help to arrive.
 
 While we use the term \emph{magnitude} to describe $\tau$, it is a stand-in for a simplified representation of a more abstract quality of any task. All tasks demand completion and the act of completion requires resources, be it time and/or energy of some form. In swarms of minimalist agents with limited capabilities, the resource required to collaboratively complete a task is invariably quantized into the number of agents attempting to complete that task.
 In bee hives and ant colonies the drive to complete a task is regulated by pheromone levels, among other signals.  In engineered swarm systems, more direct measurements of the environment through the use of on-board sensors allow a robot to independently estimate $\tau$, however imperfectly. In either case, $\tau$ is an inherent \emph{truth} about the task that can never be discerned accurately, but is always indirectly estimated by all agents. It is important to highlight that agents never share their independent estimates of $\tau$ with each other in our proposed formulation of the task-assignment problem. While this may seem like a weakness in our argument, most of the research on response-threshold task-allocation explicitly mentions limited to no communication requirements to be a major advantage of this approach versus other methods since even limited information propagation through a $>1000$ agent system quickly becomes the bottleneck for any distributed swarm algorithm.
 
-\subsection{Concurrent Benefit Task with Imperfect Information}\label{sec:conbenefit}
+\section{Concurrent Benefit Task with Imperfect Information}\label{sec:conbenefit}
 In this section, we mathematically define a concurrent benefit task which is central to our study. Consider a set of $n$ robots and suppose that each robot has an action set $A_i=\{0,1\}$ where $0$ represents \emph{not participating} in the task and $1$ represents \emph{participating} in the task. Every agent is also aware of the total number of other robots, $n$ in the system. The decision to act or not act is made by all agents at the same time, i.e. this is a one-shot game with no notion of time. The \emph{magnitude} parameter $\tau$ of the given task also plays an important role in our formalism. We let $\tau$ be an (often random) real number which represents how many agents are required to complete a task. We further assume that it belongs to an interval $E=[c,d]$ in $\R$.  Finally, we let $u_i:A_i\times\Z^+\times \R\to \R$ be the utility of the $i^{\text{th}}$ robot, where $u_i(a_i,g,\tau)$ is the utility of the $i^{\text{th}}$ robot when $g$ other robots have decided to participate in the task of magnitude $\tau$\footnote{In general, the utility of each robot depends on the joint actions of the rest of the robots. However, here we assume that the utility depends only on the number of robots participating in the activity. The following discussions can be substantially generalized to a more general setting but this form of utility serves the purpose of this study.}. 
 
 \subsubsection{Formal Definition of a Concurrent Benefit Task}\label{subsec:conbenefitdef}
@@ -520,7 +532,7 @@ for all $\hat{\tau}\in\R$ and some optimal value $d\approx 1.704$ (see \cite{cam
 
 
 
-\subsection{Discussion}\label{sec:disc}
+\section{Discussion}\label{sec:disc}
 We show in Theorem~\ref{thrm:mainthrm} that a communication-free agent-level threshold strategy is sufficient and necessary to achieve a task-allocation resulting in system-level equilibrium for concurrent benefit tasks. We then show in Theorem~\ref{thrm:relativefrequency} how such a policy effectively reduces to a continuous threshold response function that is commonly observed in social insects. While this result explains why we would observe such phenomena in natural systems, the game theory perspective leaves it unclear why one should choose a continuous threshold function in a robotic setting. Here, we would like to recall that a benefit of using a sigmoid vs.\ a step function is the randomness it adds, allowing swarm systems to quickly adapt to changes in task and environment parameters \cite{Bonabeau1997}. In particular, deliberately tuning the slope of the sigmoid threshold function as we have investigated in \cite{Kanakia2014} allows a swarm to explore different team sizes, and possibly learn from this experience, an aspect we wish to study in future work. 
 
 Theorem~\ref{thrm:mainthrm} states that there exists a unique strategy profile $s$ such that it is a system-level Bayesian Nash Equilibrium for all agents performing a concurrent benefit task. Notice that this theorem makes no claims towards an \emph{optimal} strategy for task-assignment, just an equilibrium strategy. It is important to distinguish between these two properties of the swarm system. Clearly, optimal outcomes will require communication among agents or, at least, a central entity with access to global information. In future work, we wish to study the area inbetween in wich agents exchange limited amounts of information, such as their noisy estimates $x_i$, e.g.. In particular, we have shown elsewhere \cite{Touri2014}, that noisy sharing of information leads to non-existence of such an equilibrium.
