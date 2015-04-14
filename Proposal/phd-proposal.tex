@@ -103,9 +103,12 @@
 \readerFour{Prof.~Gabe Sibley}
 \readerFive{Prof.~Sriram Sankaranarayanan}
 
-\abstract{  \OnePageChapter	% because it is very short
-
-	Abstract goes here\ldots
+\abstract{  %\OnePageChapter	% because it is very short
+	For my dissertation proposal I present a novel methodology for decentralized task-assignment in multi-agent systems. I propose using response-threshold models (both discrete and continuous) for making agent-level decisions to control macroscopic system-level behavior---drawing inspiration from social insect models such as ant colonies and bee hives. The use of such models is not new in the field of swarm robotics. Phenomenological evidence from ethologist research has provided ample evidence of the success of threshold based models for task-assignment in a multi-agent system and many swarm robotics researchers have adopted and adapted these models to engineer cooperative robotic systems.
+	
+	My contribution provides a natural extension to response-threshold models to account for dynamic tasks which require varying group sizes. I achieve this through the use of agent-level sigmoid functions, particularly the logistic function which can be tuned using a pair of parameters mapping to the desired system-level mean and variance of team sizes. I then show that response-threshold functions are a particularly good tool for solving the problem of collaborative task-assignment by proving equilibrium properties of the system resulting from their use. 
+	
+	Finally, I propose a modeling framework for optimal control of a swarm system using response-threshold based task-assignment. I explain what the term \emph{optimal control} means in the context of multi-agent task-assignment. My current goal is to set up a specific closed-loop control experiment for parameter identification and optimization using simulations and models at different layers of abstraction (micro, macro and physical layers). I also discuss avenues for future research including distributed multi-agent optimization and game theory reformulations of the problem being studied. My research does not focus on the physical limitations/constraints of robotic hardware to perform the required dynamic tasks, although I have played a large part in the design and construction of the Droplet swarm robot platform that I will use for my experiments. The target application for my dissertation work will be fully distributed indirect parameter based control of a swarm of capable robots to complete dynamic cooperative tasks with minimal human intervention.
 	}
 
 \dedication[Dedication]{	% NEVER use \OnePageChapter here.
@@ -153,9 +156,8 @@ Performing collaborative tasks is a vast sub-field of study in swarm robotics an
 	\centering\caption{The \emph{Droplet} swarm robots running a fire containment experiment inspired by a real forest firefighting scenario.}\label{fig:dropletfire}
 \end{figure}
 
-But what about tasks that are dynamic in nature such as fighting forest fires? In such cases it is impractical and often impossible to know beforehand, exactly how many agents are required for successful completion. More importantly, the benefit of larger teams of agents for such collaborative tasks increases non-linearly with team size, e.g. Where 1-5 robots may be incapable of lifting a heavy object, 6-7 will be able to lift and move it successfully but the usefulness more than 7 robots begins to diminish rapidly thereafter. I define such tasks with non-linear increase in system utility with increasing team sizes as \emph{concurrent benefit} tasks. It is for such situations that I propose a novel methodology for estimating group sizes in a distributed fashion, as described by my thesis statement, below.
+But what about tasks that are dynamic in nature such as fighting forest fires? In such cases it is impractical and often impossible to know beforehand, exactly how many agents are required for successful completion. More importantly, the benefit of larger teams of agents for such collaborative tasks increases non-linearly with team size, e.g. Where 1-5 robots may be incapable of lifting a heavy object, 6-7 will be able to lift and move it successfully but the usefulness more than 7 robots begins to diminish rapidly thereafter. I define such tasks with non-linear increase in system utility with increasing team sizes as \emph{concurrent benefit} tasks. It is for such situations that I propose a novel methodology for estimating group sizes in a distributed fashion, as described below.
 
-\section{Thesis Statement}
 \emph{Empirical evidence from biological systems suggests that there exists a generalized distributed solution for collaborative task-assignment (TA) in MASs. This solution involves the use of response-threshold functions which leads to a system-level equilibrium and can be used for optimal control of a MAS.}
 
 The rest of the paper is organized as follows. Section~\ref{sec:relwork} describes related work in multi-agent TA from multiple disciplines including Biology, Swarm Robotics, and Game Theory. The discussion in this section outlines the evolution of the TA problem from being a model  for describing social systems such insect colonies to an engineering approach for programming artificial multi-agent systems such as robot swarms. Chapter~\ref{ch:background} provides an outline of existing swarm modeling techniques, particularly multi-level abstraction using probabilistic finite state machines (PFSMs) and rate equations. Readers familiar with these techniques may skip this tutorial chapter and move straight to Chapter~\ref{ch:resthmodel}. Here, I introduce the continuous response-threshold (CRT) model for TA that is central to my study. The CRT model involves agents using a logistic function with two tunable parameters to control the mean and variance of desired team size formation. I analyze and verify this model using real robot experiments as well as simulation results. The widespread success and relevance of RT models in many disciplines led me to investigate their properties which, in turn, led to the development of two theorems showing existence of system-level equilibria for these models. This investigation forms the basis of Chapter~\ref{ch:existeqrtm}. Due to a heavy reliance on game theory formalism for proofs of the two theorems, Section~\ref{sec:ggoverview} of provides a brief introduction to the theory of \emph{global games}. The final chapter of my proposal discusses future/proposed work for my dissertation in the form of a generalized model for MAS control. Using the results from the previous two chapters I propose a novel parameter discovery and optimization methodology for swarm robot control. Finally, the Conclusion chapter briefly reiterates the original contribution my dissertation will provide for the field of swarm robotics.
@@ -315,6 +317,26 @@ One of the advantages of using macroscopic, mathematical models for describing r
 \end{figure}
 
 The Microscopic model (or micro-model) of a swarm system can be simulated using the \emph{Gillespie} simulation technique\cite{Gillespie1976,Gillespie1977}. Here, each agent is simulated individually using dice rolls and probability. Gillespie developed this simulation algorithm in the 1970s to model the time evolution of reactant and product volumes in a chemical reaction. The individual agents in his chemical system were single molecules of the reactant and the micro-model was derived from the dynamics of molecule interactions. The probability of two reactant molecules colliding was computed using simple physical properties such as the radius and velocity of the molecules in the reaction medium\cite{Gillespie1976}. Gillespie's original modeling approach has been modified for use with swarm systems, here. Martinoli outlines this process in detail in chapter 4.2 of his Ph.D. dissertation\cite{Martinoli1999b}. Robots with PFSM controllers are used instead of product and reactant molecules as the fundamental units of the simulation. First one step of the simulation, all robots are picked in a random order and their PFSMs are run in parallel for a single time-step. The state of the entire system is then updated and the process repeats itself for a pre-determined length of time. Unlike in the original version of Gillespie simulation where time-step lengths between reactions are also chosen at random, here we preset the length of time that passes between two steps of the simulation. 
+
+\section{Verification of System Properties Using Real Experiments and Physics-Based Simulation}
+An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach I have seen so far for designing models of robot swarms, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
+
+To be able to accurately recreate a task on a swarm system without investing the substantial time and resources required to develop and deploy real robots, I use physics-based simulators. The point of these simulators is to remain as true to the real world as possible while maintaining an order of magnitude improvement in speed and simplicity over real robot experiments. Unlike micro-models that abstract away physical and environmental issues such as wheel slip, sensor noise, communication delays, etc., using probability and dice rolls, physics-based simulators make the added effort to accurately and dynamically model every minute aspect of the swarm system.
+
+\begin{figure}[!ht]
+\begin{subfigure}{.5\textwidth}
+\centering\includegraphics[width=6.5cm]{../assets/Webots.png}
+\centering\caption{The Webots simulator rendering a game of robot soccer.}\label{fig:gazebo}
+\end{subfigure}~
+\begin{subfigure}{.5\textwidth}
+\centering\includegraphics[width=6.5cm]{../assets/dsim.png}
+\centering\caption{The Droplet swarm robot simulator}\label{fig:dropletsim}
+\end{subfigure}
+\caption{}
+\end{figure}
+
+Many robot simulators are currently available today as either standalone programs like Webots and Gazebo (see Figure~\ref{fig:gazebo}). Webots is a widely used simulator in swarm robotics due to its capability to simulate multiple agents and agent-agent/agent-environment interactions in real time. The Webots API also allows for cross-compilation of programs from the simulation environment, right on to real robots without the need for reprogramming and supports a wide range of commercially available robot platforms such as Kilobots, Khepera, Alice, etc. There are also in-house implementations of physics simulators for specific robot platforms, such as the Droplet simulator shown in Figure~\ref{fig:dropletsim}, that build up on physics engines such as Bullet and ODE.
+
 
 
 
@@ -678,7 +700,7 @@ Note that $N_{rel}(\hat{\tau})=\frac{\sum_{i=1}^n\mathbf{I}_{x_i\geq \td}}{n}$ w
 \end{proof}
 
 \begin{figure}[!tb]
-	\centering\includegraphics[width=.9\columnwidth]{../assets/thm2fig.png}
+	\centering\includegraphics[width=.65\columnwidth]{../assets/thm2fig.png}
 	\centering\caption{Visualization of Theorem~\ref{thrm:relativefrequency} as $N_{rel}$ estimates $\Phi(\cdot)$. The plot was generated by running Eqn.~\ref{eqn:Nrel} 10,000 times for each point in $\hat{\tau} = [1,10,\text{ (inc.) }0.1]$. $n = 10$, $\td = 5$ and $x_i = \hat{\tau} + \eta_i$ ($\eta_i \sim\mathcal{N}(0, \sigma)$). Each curve in the plot is generated by sweeping $\sigma = \{0, 0.1, 1, 2, 10\}$, with $\sigma = 0$ being a step-function and $\sigma = 10$ having the \emph{flattest} slope.}\vspace{-10px}\label{fig:thm2fig}
 \end{figure}
 
@@ -703,27 +725,7 @@ This raises the question what ``communication'' and ``sharing of information'' a
 \chapter{Designing an Optimal Control Model for Multi-Agent Systems}
 This chapter describes a particular methodology for designing and modeling robot controllers that is widely used in the swarm robotics community. While this is by no means the only modeling method available for robot swarms---e.g., other (related) modeling and control methods are described in \cite{Bayazit2005,Berman2007,Billard1999,Sugawara2013}---it has the important property of being an iterative method that integrates multiple levels of abstraction of the multi-agent system. This opens up the opportunity for parameter discovery and optimization, which is covered in section~\ref{sec:opt}.
 
-\section{Verification of System Properties Using Real Experiments and Physics-Based Simulation}
-An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach I have seen so far for designing models of robot swarms, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
-
-To be able to accurately recreate a task on a swarm system without investing the substantial time and resources required to develop and deploy real robots, I use physics-based simulators. The point of these simulators is to remain as true to the real world as possible while maintaining an order of magnitude improvement in speed and simplicity over real robot experiments. Unlike micro-models that abstract away physical and environmental issues such as wheel slip, sensor noise, communication delays, etc., using probability and dice rolls, physics-based simulators make the added effort to accurately and dynamically model every minute aspect of the swarm system.
-
-\begin{figure}[!ht]
-\begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/Webots.png}
-\centering\caption{The Webots simulator rendering a game of robot soccer.\footnotemark}\label{fig:gazebo}
-\end{subfigure}~
-\begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/dsim.png}
-\centering\caption{The Droplet swarm robot simulator}\label{fig:dropletsim}
-\end{subfigure}
-\caption{}
-\end{figure}
-\footnotetext{Image credit: \texttt{http://www.cyberbotics.com/overview}}
-
-Many robot simulators are currently available today as either standalone programs like Webots and Gazebo (see Figure~\ref{fig:gazebo}). Webots is a widely used simulator in swarm robotics due to its capability to simulate multiple agents and agent-agent/agent-environment interactions in real time. The Webots API also allows for cross-compilation of programs from the simulation environment, right on to real robots without the need for reprogramming and supports a wide range of commercially available robot platforms such as Kilobots, Khepera, Alice, etc. There are also in-house implementations of physics simulators for specific robot platforms, such as the Droplet simulator shown in Figure~\ref{fig:dropletsim}, that build up on physics engines such as Bullet and ODE.
-
-\section{Optimization}\label{sec:opt}
+\section{Iterative Least-Squares Optimization}\label{sec:opt}
 One of the major advantages of the methodology described in this section is the ability to identify and optimize important system parameters. I can re-write the PDM equations in~\eqref{eq:rateeqns} as,
 \begin{equation}
 S'(\theta,\mu,t) = \Gamma\left(\vec{S}, \theta, \mu, t\right)
