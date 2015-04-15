@@ -164,11 +164,11 @@ The rest of the paper is organized as follows. Section~\ref{sec:relwork} describ
 
 
 \section{Related Work}\label{sec:relwork}
-Using RT functions to model social behavior in insects such as ant colonies \cite{Bonabeau1996, Bonabeau1997} and bee hives \cite{Robinson1987, Robinson1992, PageJr1990} has been proposed, analyzed and verified by biologists since the 1980's \cite{Theraulaz1998}. In the past two decades swarm roboticists have begun to engineer MASs using these models. Jones and Matari\'c \cite{Jones2004} describe an adaptive method of TA for a large-scale minimalist robot system where agents independently switch between picking up different colored pucks to maintain a consistent rate of foraging for each type of colored puck. While the authors do not directly reference threshold functions, their switching algorithm simply assigns probabilities of picking up a certain colored puck versus another by accounting for the number of colored pucks observed by a robot around it, which is a form of probabilistic threshold policy. Such dynamic probabilistic threshold policies are also studied in \cite{Nouyan2002}. I proposed a modification of such strategies to instead use the logistic sigmoid function \cite{Kanakia2014}. Using a logistic function better exposes mean and variance parameters of the resulting team sizes for continuous response-threshold functions. These two parameters, along with the number of workers available and the manner in which they acquire information, are the building blocks governing TA behavior of an agent in the collective swarm (see section titled, ``Division of Labor as a Self-Organizing Process'' in \cite{Robinson1992}).
+Using RT functions to model social behavior in insects such as ant colonies \cite{Bonabeau1996, Bonabeau1997} and bee hives \cite{Robinson1987, Robinson1992, PageJr1990} has been proposed, analyzed and verified by biologists since the 1980's \cite{Theraulaz1998}. In the past two decades swarm roboticists have begun to engineer MASs using these models. Jones and Matari\'c \cite{Jones2004} describe an adaptive method of TA for a large-scale minimalist robot system where agents independently switch between picking up different colored pucks to maintain a consistent rate of foraging for each type of colored puck. While the authors do not directly reference threshold functions, their switching algorithm simply assigns probabilities of picking up a certain colored puck versus another by accounting for the number of colored pucks observed by a robot around it, which is a form of probabilistic threshold policy. Such dynamic probabilistic threshold policies are also studied in \cite{Nouyan2002}. I proposed a modification of such strategies to instead use the logistic sigmoid function \cite{Kanakia2014}. Using a logistic function better exposes mean and variance parameters of the resulting team sizes for CRT functions. These two parameters, along with the number of workers available and the manner in which they acquire information, are the building blocks governing TA behavior of an agent in the collective swarm (see section titled, ``Division of Labor as a Self-Organizing Process'' in \cite{Robinson1992}).
 
-All of the aforementioned work uses CRT functions. In contrast to this, discrete (step-function) response thresholds (DRTs) for TA and recruitment have been studied by a number of research groups utilizing the \emph{Stick Pulling} experiment \cite{Martinoli1995, Martinoli1998, Lerman2001, Martinoli2004}. Here, a task can only be solved with an exact number of robots $= \td$. The problem of distributing a swarm of robots across multiple sites with a specific desired distribution has been studied in \cite{Berman2009, Correll2008} and is extended by Mather \cite{Mather2010} allowing assignment to tasks requiring a varying number of robots. The benefits of using a TA algorithm versus just allowing agents to attempt a collaborative task, such as aggregation, without a RT is analyzed in \cite{Agassounon2001}. The authors show that threshold based TA results in increasing aggregation of seeds while no TA results in stagnation of seed collection after a little while. 
+All of the aforementioned work uses CRT functions. In contrast to this, DRTs (such as step-functions) for TA and recruitment have been studied by a number of research groups utilizing the \emph{stick pulling} experiment \cite{Martinoli1995, Martinoli1998, Lerman2001, Martinoli2004}. Here, a task can only be solved with an exact number of robots $= \td$. The problem of distributing a swarm of robots across multiple sites with a specific desired distribution has been studied in \cite{Berman2009, Correll2008} and is extended by Mather \cite{Mather2010} allowing assignment to tasks requiring a varying number of robots. The benefits of using a TA algorithm versus just allowing agents to attempt a collaborative task, such as aggregation, without a RT is analyzed in \cite{Agassounon2001}. The authors show that threshold based TA results in increasing aggregation of seeds while no TA results in stagnation of seed collection after a little while. 
 
-I have shown in \cite{Kanakia2014} (see Chapter~\ref{ch:resthmodel}) that the DRT strategy is a special case of CRTs when the slope of the sigmoid threshold function approaches infinity, and thus the step-function behavior can be accurately reproduced by the latter. In practice, varying the slope of the response-threshold function allows us to balance exploration and exploitation in the system \cite{Bonabeau1997}. It is worth noting that biological systems do not necessarily implement sigmoid functions but that they might naturally emerge from a combination of a discrete threshold and noise in the perception system, which I show analytically in \cite{Kanakia2015} (See Chapter~\ref{ch:existeqrtm}). 
+I have shown in \cite{Kanakia2014} (see Chapter~\ref{ch:resthmodel}) that the DRT strategy is a special case of CRTs when the slope of the sigmoid threshold function approaches infinity, and thus the step-function behavior can be accurately reproduced by the latter. In practice, varying the slope of the RT function allows us to balance exploration and exploitation in the system \cite{Bonabeau1997}. It is worth noting that biological systems do not necessarily implement sigmoid functions but that they might naturally emerge from a combination of a DRT and noise in the perception system, which I show analytically in \cite{Kanakia2015} (See Chapter~\ref{ch:existeqrtm}). 
 
 The development of multi-agent TA draws a very clear picture of its evolution from a behavioral model for insect colonies, developed by ethologists, to an inspired algorithmic model for adaptive MASs \cite{Krieger2000}. While biologists have provided ample empirical evidence to the success of the RT model in predicting and matching observed swarm behavior for TA, there has been no formal argument as to why natural systems gravitate towards this approach compared to other TA strategies such as leader-follower algorithms \cite{Chen2011} or market-based approaches \cite{Amstutz2008,Vig2007}; see \cite{Kalra2006} for a comparative study. My aim is to show for the first time that agent-level RT strategies drive a swarm system to some notion of equilibrium and consequently, system-level control which makes them an obvious choice for modeling natural systems and engineering artificial ones.
 
@@ -176,14 +176,14 @@ The development of multi-agent TA draws a very clear picture of its evolution fr
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Background on Swarm System Modeling Techniques}\label{ch:background}
-This chapter is designed to give the reader an introductory lesson on swarm system modeling approaches widely used by the swarm robotics community. This involves the use of \emph{probabilistic finite state machines} (PFSMs) to mathematically describe individual agent behavior as well as solving systems of ODEs often termed as \emph{rate equations} to divine macroscopic level properties of the system. These are common tools of the trade for modeling many different kinds of dynamical systems---not just MAS---and as such, if the reader is familiar with these approaches they are encouraged to skip this chapter and move on to Chapter~\ref{ch:resthmodel}.
+This chapter is designed to give the reader an introductory lesson on swarm system modeling approaches widely used by the swarm robotics community. This involves the use of PFSMs to mathematically describe individual agent behavior as well as solving systems of coupled ODEs, often termed \emph{rate equations}, to divine macroscopic level properties of the system. These are common tools of the trade for modeling many different kinds of dynamical systems---not just MAS---and as such, if the reader is familiar with these approaches they are encouraged to skip this chapter and move on to Chapter~\ref{ch:resthmodel}.
 
 The first step in the robot controller design methodology is to describe the swarming task being studied. The general strategy used by each individual agent in the swarm is defined and later translated into a viable microscopic model. A hypothesis for the observed, collective behavior of the swarm is supplied, which is later quantified into a mathematical macroscopic model.
 
 Physical characteristics of the swarm system are generally described in the experiment setup as well. These may include environmental variables such as arena size, agents' properties such as speed, communication and sensing radii, the computation power of each individual in the swarm, etc. This is an important step in identifying important system parameters that affect the outcome of the experiment, versus the environmental and agent based values that can be abstracted away when designing micro and macro-level models.
  
 \section{Designing the Controller Construct}
-Creating a logic construct---a flowchart, state-machine or algorithm---that describes the desired robot behavior for the given task is an important step in the MAS modeling process. When studying non-spatial models, the robot controller can be characterized by an FSM with a discrete number of states under urgent time-step driven semantics, as seen in Figure~\ref{fig:allfsm}. The states in the FSM ($A, B, C$ \& $D$) represent physical states that the robot can be in, such as  \emph{searching}, \emph{waiting}, etc. and can be directly derived from the program code running on the robot. One can think of each state as being an \emph{action} that the robot is currently performing based on stimulus from the environment and other robots. These stimuli can cause a robot to transition from one state to another and are represented as \emph{conditionals} on the edges of the FSM, $c_i$. These conditionals are equivalent to the decision process blocks in the flowchart and can be derived from:
+Creating a logic construct---a flowchart, state-machine or algorithm---that describes the desired robot behavior for the given task is an important step in the MAS modeling process. When studying non-spatial models, the robot controller can be characterized by an FSM with a discrete number of states under urgent time-step driven semantics, as seen in Figure~\ref{fig:allfsm}. The states in the FSM ($s_1, s_2, s_3$ \& $s_4$) represent physical states that the robot can be in, such as  \emph{searching}, \emph{waiting}, etc. and can be directly derived from the program code running on the robot. One can think of each state as being an \emph{action} that the robot is currently performing based on stimulus from the environment and other robots. These stimuli can cause a robot to transition from one state to another and are represented as \emph{conditionals} on the edges of the FSM, $c_i$. These conditionals are equivalent to the decision process blocks in the flowchart and can be derived from:
 \begin{enumerate}
 \item Sensor readings (or stigmergy) and explicit communication, e.g., seeing red light through an rgb sensor or seeing a certain number of robots around you,
 \item internal timers, e.g., transition back to search after waiting for 3 seconds,
@@ -192,26 +192,26 @@ Creating a logic construct---a flowchart, state-machine or algorithm---that desc
 
 I can now extend this modeling framework of robot behavior as an FSM to construct a PFSM, where the conditionals in the FSM are no longer true/false values but instead are probabilities of transitioning from one state to another based on external stimulus or internal state. 
 
-As alluded to earlier, the case of a state transition based on an internal timer is especially interesting. Let $c_1$ in Figure~\ref{fig:fsm} be the condition $t_A \geq 5$, i.e. time in state $A$ is greater than or equal to 5 time steps (or ticks). This conditional is true when the robot has remained in state $A$ for at least 5 ticks and consequently transitions to state $B$. Thus, the conditional $c_1$ says a robot may remain in state A for no more than 5 ticks. The equivalent transition probability for this condition would be $p_1 = 1/5$. Therefore, at each time step of the PFSM simulation, there is a $1/5$ chance that the robot will transition from state A to state B. The expected number of ticks before a transition happens is then equal to 5. This transition from deterministic FSM models to probabilistic PFSM models for swarm robot algorithms is derived in more detail in \cite{Correll2007}.
- 
-\begin{figure}[!t]
+As alluded to earlier, the case of a state transition based on an internal timer is especially interesting. Let $c_1$ in Figure~\ref{fig:fsm} be the condition $t_{s_1} \geq 5$, i.e. time in state $s_1$ is greater than or equal to 5 time steps (or ticks). This conditional is true when the robot has remained in state $s_1$ for at least 5 ticks and consequently transitions to state $s_2$. Thus, the conditional $c_1$ says a robot may remain in state A for no more than 5 ticks. The equivalent transition probability for this condition would be $p_{s_1} = 1/5$. Therefore, at each time step of the PFSM simulation, there is a $1/5$ chance that the robot will transition from state A to state B. The expected number of ticks before a transition happens is then equal to 5. This transition from deterministic FSM models to probabilistic PFSM models for swarm robot algorithms is derived in more detail in \cite{Correll2007}.
+
+\begin{figure}[!tb]
 \centering
 	\begin{subfigure}[t]{.4\textwidth}
 		\centering\begin{tikzpicture}[->,>=triangle 45,shorten >=2pt,auto,node distance=3cm,
  	                   semithick]
-
- 		\node[state] (1) {$A$};
- 	 	\node[state] (2) [right of=1] {$B$};
- 		\node[state] (3) [below of=2] {$C$};
-	  	\node[state] (4) [below of=1] {$D$};
+ 	                   
+ 		 \node[state] (1)              {$s_1$};
+ 		 \node[state] (2) [right of=1] {$s_2$};
+		 \node[state] (3) [below of=2] {$s_3$};
+		 \node[state] (4) [below of=1] {$s_4$};
 
 		\begin{scope}
-		  \path (1) 	edge node[below]{$c_1$} (2)
-  			          	edge node{$c_2$} (3)
-				 (2)	edge node{$c_3$} (3)
-						edge[bend right] node[above]{$c_4$} (1)
-				 (3) 	edge node{$c_5$} (4)	
-				 (4) 	edge node{$c_6$} (1);
+		  \path	 (1) 	edge node[below]{$c_{12}$} (2)
+  			          	edge node{$c_{13}$} (3)
+				 (2)	edge node{$c_{23}$} (3)
+						edge[bend right] node[above]{$c_{21}$} (1)
+				 (3) 	edge node{$c_{34}$} (4)	
+				 (4) 	edge node{$c_{41}$} (1);
 		\end{scope}
 		\end{tikzpicture}
 	\caption{FSM representing a single robot controller with conditional edge transitions that depend on internal and environmental factors such as timers, sensor readings, etc. Vertices represent physical or internal states that a robot can be in.}\label{fig:fsm}
@@ -220,18 +220,18 @@ As alluded to earlier, the case of a state transition based on an internal timer
 		\centering\begin{tikzpicture}[->,>=triangle 45,shorten >=2pt,auto,node distance=3cm,
                     semithick]
 
- 		 \node[state] (1)              {$A$};
- 		 \node[state] (2) [right of=1] {$B$};
-		 \node[state] (3) [below of=2] {$C$};
-		 \node[state] (4) [below of=1] {$D$};
+ 		 \node[state] (1)              {$s_1$};
+ 		 \node[state] (2) [right of=1] {$s_2$};
+		 \node[state] (3) [below of=2] {$s_3$};
+		 \node[state] (4) [below of=1] {$s_4$};
 
 		\begin{scope}
-		  \path (1) 	edge node[below]{$p_1$} (2)
-  			          	edge node{$p_2$} (3)
-				 (2)	edge node{$p_3$} (3)
-						edge[bend right] node[above]{$p_4$} (1)
-				 (3) 	edge node{$p_5$} (4)
-				 (4) 	edge node{$p_6$} (1);
+		  \path	 (1) 	edge node[below]{$p_{12}$} (2)
+  			          	edge node{$p_{13}$} (3)
+				 (2)	edge node{$p_{23}$} (3)
+						edge[bend right] node[above]{$p_{21}$} (1)
+				 (3) 	edge node{$p_{34}$} (4)	
+				 (4) 	edge node{$p_{41}$} (1);
 		\end{scope}
 	\end{tikzpicture}
 	\caption{PFSM of a robot controller with probabilistic edge transitions derived from simple geometric properties of the system.}\label{fig:pfsm}
@@ -240,33 +240,33 @@ As alluded to earlier, the case of a state transition based on an internal timer
 		\centering\begin{tikzpicture}[->,>=triangle 45,shorten >=2pt,auto,node distance=3cm,
                     semithick]
 
- 		 \node[state] (1)              {$N_A(t)$};
- 		 \node[state] (2) [right of=1] {$N_B(t)$};
-		 \node[state] (3) [below of=2] {$N_C(t)$};
-		 \node[state] (4) [below of=1] {$N_D(t)$};
+ 		 \node[state] (1)              {$N(s_1, t)$};
+ 		 \node[state] (2) [right of=1] {$N(s_2, t)$};
+		 \node[state] (3) [below of=2] {$N(s_3, t)$};
+		 \node[state] (4) [below of=1] {$N(s_4, t)$};
 
 		\begin{scope}
-		  \path (1) 	edge node[below]{$p_1$} (2)
-  			          	edge node{$p_2$} (3)
-				 (2)	edge node{$p_3$} (3)
-						edge[bend right] node[above]{$p_4$} (1)
-				 (3) 	edge node{$p_5$} (4)
-				 (4) 	edge node{$p_6$} (1);
+		  \path	 (1) 	edge node[below]{$p_{12}$} (2)
+  			          	edge node{$p_{13}$} (3)
+				 (2)	edge node{$p_{23}$} (3)
+						edge[bend right] node[above]{$p_{21}$} (1)
+				 (3) 	edge node{$p_{34}$} (4)	
+				 (4) 	edge node{$p_{41}$} (1);
 		\end{scope}
 	\end{tikzpicture}
-	\caption{A macroscopic model for the swarm system as a whole. Vertices, $N_{s_i}(t)$, represent the number of robots in state $s_i$ at time $t$. Edges are still transition probabilities between states but can also be thought of as proportions of agents entering or leaving a state at time $t$.}\label{fig:pfsmmacro}
+	\caption{A macroscopic model for the swarm system as a whole. Vertices, $N(s_i, t)$, represent the number of robots in state $s_i$ at time $t$. Edges are still transition probabilities between states but can also be thought of as proportions of agents entering or leaving a state at time $t$.}\label{fig:pfsmmacro}
 	\end{subfigure}
 \caption{Transitioning from, \textbf{(a)}: micro-model FSM that describes a single robot controller, to \textbf{(c)}: macro-model PFSM that characterizes the entire swarm system.}\label{fig:allfsm}
 \end{figure}
 
 \section{Mathematical Description of the System}
-Given a discrete set of states and conditions for transitions between them, usually in the form of probabilities of transition, a \emph{master equation} defines a set of ODEs that describe the time evolution of a physical system. So far, I have used logical constructs like FSMs to represent the robot controller running within each individual agent of the swarm system. I could instead look as these constructs as a model for the entire system, in which case the vertices of the FSM become accumulators of robots currently in a state and the edges define fractions of agents entering or leaving a given state at time $t$. The PFSM now becomes a macroscopic definition of the robot swarm and can be used to define a mathematical model for the time evolution of the system.
+Given a discrete set of states and conditions for transitions between them, usually in the form of probabilities of transition, a \emph{master equation} defines a set of coupled ODEs that describe the time evolution of a physical system. So far, I have used logical constructs like FSMs to represent the robot controller running within each individual agent of the swarm system. I could instead look as these constructs as a model for the entire system, in which case the vertices of the FSM become accumulators of robots currently in a state and the edges define fractions of agents entering or leaving a given state at time $t$. The PFSM now becomes a macroscopic definition of the robot swarm and can be used to define a mathematical model for the time evolution of the system.
 
-I will shortly discuss the conditions for linearity in a swarm system but for now, assume a simple master equation of the form,
 \begin{equation}
 \D{\vec{P}(t)} = \mathbf{A}\vec{P}(t)\label{eq:firstmaster}
 \end{equation}
-$\vec{P}$ is a vector containing $p_i(t)$, $i = [1, \ldots, |P|]$, the time-dependent probability of being in state-$i$ in the corresponding PFSM. $\mathbf{A}$ is a matrix containing transition rates of going from state-$i$ to state-$j$ in the PFSM. When I multiply both sides of equation~\eqref{eq:firstmaster} by the total number of agents, $N_0$, I get the modified master equation that gives a macroscopic description of the system.
+
+$\vec{P}$ is a vector containing the time-dependent probability of being in any given state in the corresponding PFSM. $\mathbf{A}$ is a matrix containing transition rates of going from state-$i$ to state-$j$ in the PFSM. When I multiply both sides of equation~\eqref{eq:firstmaster} by the total number of agents, $N_0$, I get the modified master equation that gives a macroscopic description of the system.
 \begin{align}
 N_0 \vec{P}'(t) = \mathbf{A}\left(N_0\vec{P}(t)\right)\notag\\
 \vec{S}'(t) = \mathbf{A}\vec{S}(t)\label{eq:master}
@@ -274,7 +274,7 @@ N_0 \vec{P}'(t) = \mathbf{A}\left(N_0\vec{P}(t)\right)\notag\\
 where $\vec{S}$ is a state vector containing the number of agents in each state, $N_{s_i}$, at time t. Here, $\abs{\vec{S}}$ is equal to the number of unique states of the system, e.g. $\abs{\vec{S}} = 4$ in my previous PFSM example from Figure~\ref{fig:pfsm}. The matrix $\mathbf{A}$ contains transition probabilities between the states in the PFSM. There a two types of elements, $a_{ij}$ in matrix $\mathbf{A}$.
 \begin{enumerate}
 \item The non-diagonal entries, $a_{ij}$ s.t. $i\not=j$, are equal to $p(c_{ij})$ (shortened to $p_{ij}$), the probability of transitioning from state $s_i$ to $s_j$ via the edge with conditional $c_{ij}$ in the FSM.
-\item The diagonal entries, $a_{ii}$, are equal to the negative sum of all edge probabilities $p_{ij}$ leaving state $s_i$.
+\item The diagonal entries, $a_{ii}$, are equal to the negative sum of all edge probabilities $p_{n}$ leaving state $s_i$.
 \end{enumerate} 
 If an edge does not exist between two states $s_i$, $s_j$ ($i\not=j$) in the FSM, then entry $a_{ij} = 0$, e.g., the master equation for the swarm system described in Figure~\ref{fig:pfsm} is,
 \begin{equation}\label{eq:mastereqns}
@@ -283,10 +283,10 @@ If an edge does not exist between two states $s_i$, $s_j$ ($i\not=j$) in the FSM
 \right) =
 \left(
 	\begin{array}{cccc}
-	-(p_1 + p_2) & p_4 & 0 & p_6\\
-	p_1 & -(p_3 + p_4) & 0 & 0\\
-	p_2 & p_3 & -p_5 & 0\\
-	0 & 0 & p_5 & -p_6
+	-(p_{12} + p_{13}) & p_{21} & 0 & p_{41}\\
+	p_{12} & -(p_{21} + p_{23}) & 0 & 0\\
+	p_{13} & p_{23} & -p_{34} & 0\\
+	0 & 0 & p_{34} & -p_{41}
 	\end{array}
 \right)
 \left(\begin{array}{c}N_A(t) \\ N_B(t) \\ N_C(t) \\ N_D(t)\end{array}\right)
@@ -294,17 +294,17 @@ If an edge does not exist between two states $s_i$, $s_j$ ($i\not=j$) in the FSM
 
 In most of the scenarios being discussed in this paper, I assume that agents are neither removed nor added to a swarm system once an experiment has begun and therefore add the following constraints to the model,
 \begin{align}
-N_0 = & \sum\limits^{\abs{\vec{S}}}_{i=1} N_{s_i}(t)\\
-\forall i \gets 1\ldots\abs{\vec{S}}, & \sum\limits^{\abs{\vec{S}}}_{j=1}a_{ij} = 1 \hspace{1cm}\text{(in matrix $\mathbf{A}$)}
+N_0 = & \sum\limits^{\abs{\vec{S}}}_{i=1} N(s_i, t)\\
+\forall j \gets 1\ldots\abs{\vec{S}}, & \sum\limits^{\abs{\vec{S}}}_{i=1}a_{ij} = 0
 \end{align}
 Due to this constraint a simplification can be made to any one (but no more than one) of the states $s_i$ in $\vec{S}$ so that,
 \begin{equation}
-	N_{s_i}(t) = N_0 - \sum\limits_{j=1,j\not=i}^{\abs{\vec{S}}}N_{s_j}(t)
+	N(s_i, t) = N_0 - \sum\limits_{j=1,j\not=i}^{\abs{\vec{S}}}N(s_j, t)
 \end{equation}
 
-In swarm robotics literature, the master equation is often expanded to a set of difference equations or continuous ODEs called \emph{rate equations} of the form,
+In swarm robotics literature, the master equation is often expanded to a set of difference equations or coupled ODEs called \emph{rate equations} of the form,
 \begin{equation}\label{eq:rateeqns}
-	N_{s_i}'(t) = \sum\limits_{j=1}^{\abs{\vec{S}}}p_{ji}N_{s_j}(t) - \sum\limits_{k=1}^{\abs{\vec{S}}}p_{ik}N_{s_i}(t)
+	N'(s_i, t) = \sum\limits_{j=1}^{\abs{\vec{S}}}p_{ji}N(s_j, t) - \sum\limits_{k=1}^{\abs{\vec{S}}}p_{ik}N(s_i, t)
 \end{equation}
 along with a set of initial conditions that define the number of robots in each state at time 0. Rate equations are the preferred method for describing a macro-model of a swarm system because, unlike the master equation, they can represent probability values that could be complex, non-linear functions of environment variables, control variables, as well as time. These are also commonly referred to as population dynamics models.
 
@@ -319,25 +319,33 @@ One of the advantages of using macroscopic, mathematical models for describing r
 The Microscopic model (or micro-model) of a swarm system can be simulated using the \emph{Gillespie} simulation technique\cite{Gillespie1976,Gillespie1977}. Here, each agent is simulated individually using dice rolls and probability. Gillespie developed this simulation algorithm in the 1970s to model the time evolution of reactant and product volumes in a chemical reaction. The individual agents in his chemical system were single molecules of the reactant and the micro-model was derived from the dynamics of molecule interactions. The probability of two reactant molecules colliding was computed using simple physical properties such as the radius and velocity of the molecules in the reaction medium\cite{Gillespie1976}. Gillespie's original modeling approach has been modified for use with swarm systems, here. Martinoli outlines this process in detail in chapter 4.2 of his Ph.D. dissertation\cite{Martinoli1999b}. Robots with PFSM controllers are used instead of product and reactant molecules as the fundamental units of the simulation. First one step of the simulation, all robots are picked in a random order and their PFSMs are run in parallel for a single time-step. The state of the entire system is then updated and the process repeats itself for a pre-determined length of time. Unlike in the original version of Gillespie simulation where time-step lengths between reactions are also chosen at random, here we preset the length of time that passes between two steps of the simulation. 
 
 \section{Verification of System Properties Using Real Experiments and Physics-Based Simulation}
-An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach I have seen so far for designing models of robot swarms, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
-
-To be able to accurately recreate a task on a swarm system without investing the substantial time and resources required to develop and deploy real robots, I use physics-based simulators. The point of these simulators is to remain as true to the real world as possible while maintaining an order of magnitude improvement in speed and simplicity over real robot experiments. Unlike micro-models that abstract away physical and environmental issues such as wheel slip, sensor noise, communication delays, etc., using probability and dice rolls, physics-based simulators make the added effort to accurately and dynamically model every minute aspect of the swarm system.
-
-\begin{figure}[!ht]
+\begin{figure}[!tb]
 \begin{subfigure}{.5\textwidth}
 \centering\includegraphics[width=6.5cm]{../assets/Webots.png}
-\centering\caption{The Webots simulator rendering a game of robot soccer.}\label{fig:gazebo}
+\centering\caption{The Webots simulator rendering a game of robot soccer.}\label{fig:webots}
 \end{subfigure}~
 \begin{subfigure}{.5\textwidth}
 \centering\includegraphics[width=6.5cm]{../assets/dsim.png}
 \centering\caption{The Droplet swarm robot simulator}\label{fig:dropletsim}
 \end{subfigure}
-\caption{}
+\caption{Swarm robot simulators.}
 \end{figure}
 
-Many robot simulators are currently available today as either standalone programs like Webots and Gazebo (see Figure~\ref{fig:gazebo}). Webots is a widely used simulator in swarm robotics due to its capability to simulate multiple agents and agent-agent/agent-environment interactions in real time. The Webots API also allows for cross-compilation of programs from the simulation environment, right on to real robots without the need for reprogramming and supports a wide range of commercially available robot platforms such as Kilobots, Khepera, Alice, etc. There are also in-house implementations of physics simulators for specific robot platforms, such as the Droplet simulator shown in Figure~\ref{fig:dropletsim}, that build up on physics engines such as Bullet and ODE.
+An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach applied so far for designing swarm robot models, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
 
+Physics-based simulators are often used to accurately recreate a task on a swarm system without investing the substantial time and resources required to develop and deploy real robots. These simulators attempt to remain as true to the real world as possible while maintaining an order of magnitude improvement in speed and simplicity over real robot experiments. Unlike micro-models that abstract away physical and environmental issues such as wheel slip, sensor noise, communication delays, etc., physics-based simulators make the added effort to accurately and dynamically model every minute aspect of the swarm system.
 
+Many robot simulators are currently available today as either standalone programs like Webots (see Figure~\ref{fig:webots}). Webots is a widely used simulator in swarm robotics due to its capability to simulate multiple agents and agent-agent/agent-environment interactions in real time. The Webots API also allows for cross-compilation of programs from the simulation environment, right on to real robots without the need for reprogramming and supports a wide range of commercially available robot platforms such as Kilobots, Khepera, Alice, etc. There are also in-house implementations of physics simulators for specific robot platforms, such as the Droplet simulator shown in Figure~\ref{fig:dropletsim}, that build up on physics engines such as Bullet and ODE.
+
+\section{Summary}
+The different methods discussed in this section are widely used for modeling and analyzing multi-agent systems and their corresponding algorithms. Each modeling methodology provides advantages at different levels of abstraction:
+\begin{enumerate}
+	\item Gillespie simulation using FSM models allow us to study how micro-level individual agent interactions affect large scale behavior in the swarm.
+	\item PFSM models and rate equations allow us to study the dynamics of the system which provides insight on macro-level aspects such as steady state analysis, parameter identification, equilibria, etc.
+	\item Physics based simulations allow us to quickly verify our algorithms and provide a rapid prototyping tool for iterative refinement of swarm algorithms without having to invest in costly hardware.
+\end{enumerate}
+
+The following sections use at least a few of these methodologies to define and analyze new task-assignment strategies for multi-agent systems. In Chapter~\ref{ch:optimization} I use all of these methods and results from the following two chapters to propose a generalized framework for optimal control of a robot swarm.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -395,7 +403,6 @@ Note that the proposed response threshold function is different from \cite{Bonab
 \section{Macroscopic analysis}\label{sec:macromodel}
 In this section I study how the local parameters $\tau$ and $\theta$ from an individual agent's sigmoid threshold function affect formation of groups of different sizes at the macroscopic system level.
 
-\subsection{A general model of probabilistic TA}
 Equation \eqref{eq:sig} is a cumulative probability density function approaching $1.0$ as the number of agents approaches infinity, that is $\lim_{x \to \infty}\sig(x)=1$. For $\theta \to \infty$, equation \eqref{eq:sig} approximates the unit step:
 \begin{equation}
 \lim_{\theta \to \infty} \frac{1}{1+e^{\theta(\tau-\xm)}}\approx
@@ -409,7 +416,6 @@ Equation \eqref{eq:sig} is a cumulative probability density function approaching
 \end{equation}
 Although, unlike the unit step function, the limit on the left in \eqref{eq:siglim} is always continuous, even at $\xm = \tau$ where the value of the sigmoid is $1/2$. The proposed model is therefore a generalization of the ``stick-pulling'' TA model with deterministic team size \cite{Lerman2001}, allowing us to tune the variable resulting group sizes using the tuning parameters $\tau$ and $\theta$ in \eqref{eq:sig}. 
 
-\subsection{From individual choices to team-level collaboration}
 Assuming the agents to be loosely synchronized, e.g., by considering decisions within a finite window of time, determining a majority vote corresponds to a Bernoulli trial with each agent flipping a biased coin---the bias being computed using the sigmoid function---to decide whether or not to collaborate in the next time step. The probability that exactly $k$ agents collaborate from a population of $n$ agents at a collaboration site is given by the probability mass function (PMF) of a Binomial distribution.
 \begin{equation}
 	B(n, k) = \binom{n}{k}\sig(n)^{k}\left(1 - \sig(n)\right)^{n - k}\label{eq:binomial}
@@ -496,7 +502,7 @@ In order to compare the dynamics of the proposed probabilistic TA mechanism with
 I use Gillespie simulation \cite{Gillespie1976} to explore the dynamics of the proposed collaboration model.
 For both experiments a single collaboration site is used and each run simulates 300s of time. The desired group size ($\tau$, in Eq.~\eqref{eq:sig}) is set to 4, 8, 16 and 32 agents out of a total of 100 robots. The collaboration task is programmed to take 10s, on average, per agent. Data points are gathered by averaging data from 100 identically set up runs in each case. The \emph{rate of collaboration} for the threshold model is computed by summing the number of groups that successfully collaborate and dividing by the total experiment time (300s). For the deterministic model, collaboration rate is computed by summing all successful collaborations, i.e. collaborations involving team sizes equal to $\tau$, and dividing the the experiment time (300s).
 
-\section{Results}
+\section{Experiments and Results}
 \begin{figure*}[!htb]
 \begin{subfigure}{0.33\textwidth}
 \centering\includegraphics[width=1.0\textwidth]{../assets/LermanCollabCompare3.png}
@@ -571,7 +577,7 @@ To account for the vision software's detection errors, the raw data gathered fro
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}\label{sec:discussion}
+\section{Discussion}
 Results in Figures \ref{fig:lercol}, \ref{fig:collabsweep} and \ref{fig:meansvars} show that the proposed threshold-based TA mechanism is a generalization of the deterministic Lerman model in that it allows to approach what is seen with deterministic group sizes while retaining the elasticity to vary group sizes along any desired range of values. Also, these plots show how altering microscopic control parameters within the agents, $\theta$ and $\tau$ of their sigmoid functions, directly affects macroscopic behavior of the swarm system by altering means and variances of formed group sizes, respectively. Although the matching between microscopic results and macroscopic prediction is not perfect due to the discrete approximation, the plots show that a wide range of means and variances are feasible. Finding appropriate parameters to reach these could be easily achieved using a suitable optimization framework such as presented in \cite{Correll2008,Berman2009}, using the macroscopic predictions as initial estimate. 
 
 The proposed TA algorithm requires an estimate of the group size at each collaboration site as well as the ability to communicate with the group in order to reach a consensus. While these assumptions seem to be limiting at first sight, they can be rolled into the analysis process and possibly exploited to design the TA process. For example, an increasing variance for observing the group size $\tau$ or noise in the consensus process simply increase the variance of the TA process and could therefore be countered---to some extent---by altering the properties of the response threshold function. 
@@ -584,7 +590,8 @@ Although the algorithm does not deadlock---the probability to collaborate even i
 
 In practice, effective collaboration rates will also be limited by the embodiment of the robots, which might make finding physical space at a site cumbersome. In the presented microscopic simulation, for both stochastic and deterministic team sizes, the number of robots per site were not limited, allowing scenarios in which multiple groups collaborate in quick succession at the same site. While comparing both models without embodiment is reasonable, I wish to study the effect of embodiment in future work.
 
-
+\section{Summary}
+In this chapter I presented a multi-agent collaboration algorithm to recruit an approximate number of individually simple robots with controllable variance. I proposed a sigmoid RT function motivated by TA in social insects and describe macro-level models backed by micro-level simulations to predict the resulting team sizes and their variance.  These results were further validated through physical experiments using the \emph{Droplet} swarm robotics platform. I showed that the slope of the response threshold function could be used to control the variance of group size, allowing agents to trade off deterministic team size with coordination speed, and making the proposed mechanism applicable to a variety of applications.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot TA}\label{ch:existeqrtm}
@@ -597,7 +604,7 @@ In bee hives and ant colonies the drive to complete a task is regulated by phero
 \section{Concurrent Benefit Task with Imperfect Information}\label{sec:conbenefit}
 In this section, I mathematically define a concurrent benefit task which is central to my study. Consider a set of $n$ robots and suppose that each robot has an action set $A_i=\{0,1\}$ where $0$ represents \emph{not participating} in the task and $1$ represents \emph{participating} in the task. Every agent is also aware of the total number of other robots, $n$ in the system. The decision to act or not act is made by all agents at the same time, i.e. this is a one-shot game with no notion of time. The \emph{magnitude} parameter $\tau$ of the given task also plays an important role in my formalism. I let $\tau$ be an (often random) real number which represents how many agents are required to complete a task. I further assume that it belongs to an interval $E=[c,d]$ in $\R$.  Finally, I let $u_i:A_i\times\Z^+\times \R\to \R$ be the utility of the $i^{\text{th}}$ robot, where $u_i(a_i,g,\tau)$ is the utility of the $i^{\text{th}}$ robot when $g$ other robots have decided to participate in the task of magnitude $\tau$\footnote{In general, the utility of each robot depends on the joint actions of the rest of the robots. However, here I assume that the utility depends only on the number of robots participating in the activity. The following discussions can be substantially generalized to a more general setting but this form of utility serves the purpose of this study.}. 
 
-\subsubsection{Formal Definition of a Concurrent Benefit Task}\label{subsec:conbenefitdef}
+\subsection{Formal Definition of a Concurrent Benefit Task}\label{subsec:conbenefitdef}
 I define a task $T$ to be a \emph{concurrent benefit task} if:
 \begin{enumerate}[a.]
 	\item $u_i(1,g,\tau)-u_i(0,g,\tau)$ is an increasing and continuous function of $\tau$ for any $a_i\in A_i$ and $g$. I further assume that $|u_i(1,g,\tau)-u_i(0,g,\tau)|\leq \tau^p$ for some $p\geq 1$. 
@@ -624,7 +631,7 @@ where $E(\cdot \mid x_i)$ is the conditional probability of $u_i$ given the $i$t
 
 Now, I are ready to define what I mean by a \emph{sensible strategy}. I say that a strategy profile $s=(s_1,\ldots,s_n)$ is sensible strategy, if it leads to a \emph{Bayesian Nash Equilibrium} (BNE) \cite{Fudenberg1998}, given $s_i=BR(s_{-i})$ for all $i\in \{1,\ldots,n\}$. In other words, with the current strategies of the $n$ robots, no robot has the incentive to deviate from its current strategy.
 
-\subsubsection{Threshold-Based Bayesian Nash Equilibrium}\label{subsec:thmproof}
+\subsection{Threshold-Based Bayesian Nash Equilibrium}\label{subsec:thmproof}
 I now show that any task with concurrent benefit admits a threshold strategy BNE. In other words, it is sufficient for the agents to follow a simple algorithm: 
 \begin{enumerate}[(i)]
 \item Compare your noisy measurement $x_i$ to a threshold value $\td_i$,
@@ -674,7 +681,7 @@ By Lemma~\ref{lemma:thresholdBR}, the best response of a threshold policy is a t
 \end{proof}
 
 
-\subsubsection{From Discrete to Continuous Thresholds}\label{subsec:sigfun}
+\subsection{From Discrete to Continuous Thresholds}\label{subsec:sigfun}
 After showing that discrete thresholds indeed result in a BNE for systems in which agents do not directly communicate, I will now show how sensor noise at the individual level results in a continuous response-threshold phenomena that is prevalent in MAS and social insects. 
 
 Suppose that all the agents share the same utility function $u(a_i,g,\tau)$ and also, assume that the observation noise of the $n$ agents ($\eta_1,\ldots,\eta_n$) are independent and identically distributed (i.i.d) $\mathcal{N}(0,\sigma^2)$ Gaussian random variables. Then, it is not hard to see that there exists a BNE with threshold strategies that have the same threshold value $\td$ (see  \cite{Morris2000}). Now, consider a realization of $\tau=\hat{\tau}$ and suppose that I have a large number of agents $n$ observing a noisy variation of $\hat{\tau}$. Take for example the case of fire-fighting robots, and let $\hat{\tau}$ be the magnitude (including type, intensity, area, etc.) of the fire. Then, since the observations of the $n$ agents are independent given the value of $\tau$, they will be distributed according to $\mathcal{N}(\hat{\tau},\sigma^2)$ (given the value of $\tau$). Now consider the relative number of agents taking part in the activity given the realized magnitude parameter $\hat{\tau}$ and denote it by 
@@ -719,10 +726,11 @@ Theorem~\ref{thrm:mainthrm} states that there exists a unique strategy profile $
 
 This raises the question what ``communication'' and ``sharing of information'' actually mean. In this paper, communication is limited to common observations of an unknown environmental variable $\tau$. Natural swarming systems often communicate by modifying the environment, a form of indirect communication known as stigmergy \cite{Grasse1959}. The key difference between this form of communication and direct exchange of information, as I discuss in \cite{Touri2014}, is that the same information is simultaneously accessible to all individuals. I therefore believe that the results presented here extend also to indirect communication via stigmergy where $\tau$ is the measurable result of previous agent activity.
 
+\section{Summary}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Designing an Optimal Control Model for Multi-Agent Systems}
+\chapter{Designing an Optimal Control Model for Multi-Agent Systems}\label{ch:optimization}
 This chapter describes a particular methodology for designing and modeling robot controllers that is widely used in the swarm robotics community. While this is by no means the only modeling method available for robot swarms---e.g., other (related) modeling and control methods are described in \cite{Bayazit2005,Berman2007,Billard1999,Sugawara2013}---it has the important property of being an iterative method that integrates multiple levels of abstraction of the multi-agent system. This opens up the opportunity for parameter discovery and optimization, which is covered in section~\ref{sec:opt}.
 
 \section{Iterative Least-Squares Optimization}\label{sec:opt}
