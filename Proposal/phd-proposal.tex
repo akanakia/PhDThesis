@@ -115,11 +115,11 @@
 \readerFive{Prof.~Sriram Sankaranarayanan}
 
 \abstract{  %\OnePageChapter	% because it is very short
-	For my dissertation proposal I present a novel methodology for decentralized task-assignment in multi-agent systems. I propose using response-threshold models (both discrete and continuous) for making agent-level decisions to control macroscopic system-level behavior---drawing inspiration from social insect models such as ant colonies and bee hives. The use of such models is not new in the field of swarm robotics. Phenomenological evidence from ethologist research has provided ample evidence of the success of threshold based models for task-assignment in a multi-agent system and many swarm robotics researchers have adopted and adapted these models to engineer cooperative robotic systems.
+	For my dissertation proposal I present a novel methodology for task-assignment in multi-agent systems. I propose using response-threshold models (both discrete and continuous) for making agent-level decisions to control macroscopic system-level behavior---drawing inspiration from social insect models such as ant colonies and bee hives. The use of such models is not new in the field of swarm robotics. Phenomenological evidence from ethologist research has provided ample evidence of the success of threshold based models for task-assignment in a multi-agent system and many swarm robotics researchers have adopted and adapted these models to engineer cooperative robotic systems.
 	
 	My contribution provides a natural extension to response-threshold models to account for dynamic tasks which require varying group sizes. I achieve this through the use of agent-level sigmoid functions, particularly the logistic function which can be tuned using a pair of parameters mapping to the desired system-level mean and variance of team sizes. I then show that response-threshold functions are a particularly good tool for solving the problem of collaborative task-assignment by proving equilibrium properties of the system resulting from their use. 
 	
-	Finally, I propose a modeling framework for optimal control of a swarm system using response-threshold based task-assignment. I explain what the term \emph{optimal control} means in the context of multi-agent task-assignment. My current goal is to set up a specific closed-loop control experiment for parameter identification and optimization using simulations and models at different layers of abstraction (micro, macro and physical layers). I also discuss avenues for future research including distributed multi-agent optimization and game theory reformulations of the problem being studied. My research does not focus on the physical limitations/constraints of robotic hardware to perform the required dynamic tasks, although I have played a large part in the design and construction of the Droplet swarm robot platform that I will use for my experiments. The target application for my dissertation work will be fully distributed indirect parameter based control of a swarm of capable robots to complete dynamic cooperative tasks with minimal human intervention.
+	Finally, I propose a modeling framework for optimal control of a swarm system using response-threshold based task-assignment. I explain what the term \emph{optimal control} means in the context of multi-agent task-assignment. My current goal is to set up a specific closed-loop control experiment for parameter identification and optimization using simulations and models at different layers of abstraction (micro, macro and physical layers). I also discuss avenues for future research including distributed multi-agent optimization and game theory reformulations of the problem being studied. My research does not focus on the physical limitations/constraints of robotic hardware to perform the required dynamic tasks, although I have played a large part in the design and construction of the Droplet swarm robot platform that I will use for my experiments. The target application for my dissertation work will be distributed indirect parameter based control of a swarm of capable robots to complete dynamic cooperative tasks with minimal human intervention.
 	}
 
 \dedication[Dedication]{	% NEVER use \OnePageChapter here.
@@ -169,7 +169,7 @@ Performing collaborative tasks is a vast sub-field of study in swarm robotics an
 
 But what about tasks that are dynamic in nature such as fighting forest fires? In such cases it is impractical and often impossible to know beforehand, exactly how many agents are required for successful completion. More importantly, the benefit of larger teams of agents for such collaborative tasks increases non-linearly with team size, e.g. Where 1-5 robots may be incapable of lifting a heavy object, 6-7 will be able to lift and move it successfully but the usefulness more than 7 robots begins to diminish rapidly thereafter. I define such tasks with non-linear increase in system utility with increasing team sizes as \emph{concurrent benefit} tasks. It is for such situations that I propose a novel methodology for estimating group sizes in a distributed fashion, as described below.
 
-\emph{Empirical evidence from biological systems suggests that there exists a generalized distributed solution for collaborative task-assignment (TA) in MASs. This solution involves the use of response-threshold functions which leads to a system-level equilibrium and can be used for optimal control of a MAS.}
+\emph{Empirical evidence from biological systems suggests that there exists a generalized solution for collaborative task-assignment in multi-agent systems. This solution involves the use of response-threshold functions which leads to a system-level equilibrium and can be used for optimal control of a multi-agent system.}
 
 The rest of the paper is organized as follows. Section~\ref{sec:relwork} describes related work in multi-agent TA from multiple disciplines including Biology, Swarm Robotics, and Game Theory. The discussion in this section outlines the evolution of the TA problem from being a model  for describing social systems such insect colonies to an engineering approach for programming artificial multi-agent systems such as robot swarms. Chapter~\ref{ch:background} provides an outline of existing swarm modeling techniques, particularly multi-level abstraction using probabilistic finite state machines (PFSMs) and rate equations. Readers familiar with these techniques may skip this tutorial chapter and move straight to Chapter~\ref{ch:resthmodel}. Here, I introduce the continuous response-threshold (CRT) model for TA that is central to my study. The CRT model involves agents using a logistic function with two tunable parameters to control the mean and variance of desired team size formation. I analyze and verify this model using real robot experiments as well as simulation results. The widespread success and relevance of RT models in many disciplines led me to investigate their properties which, in turn, led to the development of two theorems showing existence of system-level equilibria for these models. This investigation forms the basis of Chapter~\ref{ch:existeqrtm}. Due to a heavy reliance on game theory formalism for proofs of the two theorems, Section~\ref{sec:ggoverview} of provides a brief introduction to the theory of \emph{global games}. The final chapter of my proposal discusses future/proposed work for my dissertation in the form of a generalized model for MAS control. Using the results from the previous two chapters I propose a novel parameter discovery and optimization methodology for swarm robot control. Finally, the Conclusion chapter briefly reiterates the original contribution my dissertation will provide for the field of swarm robotics.
 
@@ -557,7 +557,7 @@ With increasing $\theta$ the Logistic function approximates a unit step, minimiz
 
 I observe the collaboration rate to be qualitatively and quantitatively very similar for high values of $\theta$ (steep slope), and to exceed that of the deterministic model for very low values of $\theta$ (flat slope). This is expected as flat slopes increase the variance of the observed group size and therefore allow much smaller teams than $\tau$ agents to collaborate.
 
-\begin{figure*}[!htb]
+\begin{figure}[!htb]
 \begin{subfigure}{0.5\textwidth}
 \centering\includegraphics[width=1.0\textwidth]{../assets/means.png}
 \centering\caption{}\label{fig:means}
@@ -567,7 +567,7 @@ I observe the collaboration rate to be qualitatively and quantitatively very sim
 \centering\caption{}\label{fig:vars}
 \end{subfigure}
 \caption{Showing the effects of varying $\theta$ on means and variances corresponding to the histograms seen in Fig.~\ref{fig:collabsweep}.}\label{fig:meansvars}
-\end{figure*}
+\end{figure}
 
 Figure \ref{fig:collabsweep} shows histograms of the resulting group sizes for various values of $\tau=4, 8, 16, 32$ and $\theta=[0;0.1;1]$ (100 simulations per data point). It is clearly seen that when $\theta$ is set to 0, the sigmoid becomes constant ($\sig(x) = 1/(1 + e^{0}) = 0.5$) so agents have an equal probability to want to collaborate or not, no matter what the desired group size is. I therefore see a large number of small groups forming, with most groups consisting of 2 agents. This is to be expected since the expected number of agents willing to collaborate in a group of size 2 is 1, given the probability of collaboration is constant at 0.5.
 
@@ -769,26 +769,34 @@ It is evident from eq.\eqref{eq:thetaopt} and eq.\eqref{eq:muopt} that these sep
 The index $n$ corresponds to the number of the experiment that led to an observation of the steady state $\hat{S}^*(\theta, \mu, n)$. Further discussion and applications of this parameter optimization approach are discussed in\cite{Correll2006a,Correll2008}.
 
 \begin{figure}[!ht]
-\centering\includegraphics[width=15cm]{../assets/ssmodel.png}
+\centering\includegraphics[width=.75\textwidth]{../assets/ssmodel.png}
 \centering\caption{The closed loop design framework for a swarm robot system controller. Real world data is passed through models running at different layers of abstraction, which in-turn feed their solutions for parameter discovery and optimization back to the real system.}\label{fig:recipe}
 \end{figure}
 
-I have now discussed all the of the steps needed to design a robot controller and its corresponding (non-spatial) models for a particular swarming task. Figure~\ref{fig:recipe} gives us a visual representation of the entire process including the modeling methods used at different levels of abstraction of the swarm system. 
+I have now discussed all the of the steps needed to design a robot controller and its corresponding (non-spatial) models for a particular swarming task. Figure~\ref{fig:recipe} gives us a visual representation of the entire process including the modeling methods used at different levels of abstraction of the swarm system. This design methodology is a closed loop feedback system. Setting up the required swarming task as a real physical experiment or physical simulation allows us to discover and measure the different free parameters in the system. I then use these variables in lower resolution models (micro-level) as well as in the development of mathematical models (macro-level) for my system. These more abstract models allow us to rapidly experiment with system parameters and optimize them. I can then use these optimized parameters back in the real physical experiments to improve the desired behavior of the system and repeat the cycle till the desired level of accuracy and satisfaction of  model behavior is achieved.
 
-This design methodology is a closed loop feedback system. Setting up the required swarming task as a real physical experiment or physical simulation allows us to discover and measure the different free parameters in the system. I then use these variables in lower resolution models (micro-level) as well as in the development of mathematical models (macro-level) for my system. These more abstract models allow us to rapidly experiment with system parameters and optimize them. I can then use these optimized parameters back in the real physical experiments to improve the desired behavior of the system and repeat the cycle till the desired level of accuracy and satisfaction of  model behavior is achieved. Finally, I hope to deploy these swarm systems in the real world to tackle real problems using the novel yet algorithmically simple approach that swarm robotics lends us.
+\begin{figure}[!tb]
+\centering\begin{subfigure}{.6\textwidth}
+	\centering\includegraphics[scale=.275]{../assets/droplettablewc.png}
+\end{subfigure}~
+\centering\begin{subfigure}{.4\textwidth}
+	\centering\includegraphics[scale=.275]{../assets/droplettablepj.png}
+\end{subfigure}
+\centering\caption{(Left) The droplet platform from the point-of-view of an overhead webcam. (Right) The overhead projector setup for Droplet testing and experimentation.}
+\end{figure}\label{fig:optexpsetup}
 
-\section{Optimal Vehicle-Target Assignment}
-I inspect the cooperative, distributed welfare game of vehicle-target assignment with welfare functions that are not sub-modular, but are instead based on target specific threshold values and player-target assignment constraints. Target threshold values define individual agent payoffs depending on the size of the group.
+I propose the following experiment for validating all the research I have done so far. Going back to my firefighting example (See Figures~\ref{fig:dropletfire} and \ref{fig:ggsetup}) and the work discussed in Chapter~\ref{ch:resthmodel}, the free parameters of the swarm system are $\theta$ and $\tau$ that map to the desired mean team size and variance at a fire. In the experiment, each robot would make it's own initial guess for these two parameters and then a series of PFSM models and rate equation solutions (running on a PC, offline from the robot hardware) would iteratively compute the expected ``best'' team size for a fire of a certain size. This updated parameter information is communicated to the swarm through the use of infrared communication channels and the robots update their estimates of the control parameters while sending back sensory information (environment parameters) through the same channels to a central controller. The magnitude of the fire is controlled by projecting blobs of different color gradients (from red being hottest to yellow being coldest) onto the Droplet arena from a computer program attached to the projector. An objective function must be chosen for optimizing the system and this is a problem I am currently working on. My work in Chapter~\ref{ch:existeqrtm} will be very helpful on this front as the expectation of equilibrium in a swarm system using a CRT model for TA could lead to a well defined notion of system-level optimality. The reader should bear in mind that equilibrium and optimality are not often related in the sort of complex systems we are interested in here but there are notions of how good an equilibrium strategy is compared to an optimal strategy in game theory that could prove useful to my cause. Refer to \cite{Koutsoupias1999} and Section~\ref{sec:poapos} for more information on this topic. Formally defining the optimum behavior for a swarm system is an still an open problem that needs further study. 
 
-One can imagine cooperative scenarios where a group must attain at least some minimum size to successfully complete a task. Tasks such as real-time mapping, object detection and containment, etc. fall into this category. Such tasks can often be seen as a special flavor of the vehicle-target assignment problem where players groups of a certain size  must pick the same target to successfully complete their mission and receive a non-zero payoff.
+A MAS can be made to behave in a desired manner using the approach mentioned above but it is a centralized approach. There exist distributed optimization strategies such as the sub-gradient methods discussed in \cite{Nedic2009}. These methods may lead to a distributed strategy for optimal control of a MAS and, time permitting, bear further investigation. An avenue for analyzing the benefits vs.~payoffs for centralized vs.~decentralized systems is once again afforded to us by game theory. The following \emph{addendum section} describes some work I have done in this regard.
 
-Examples of these scenarios are prevalent in the fields of multi-agent systems and swarm robotics where large groups of individually simple agents must cooperate in order to complete complex tasks. Foraging, collective inspection, collective object detection and real-time mapping of a target perimeter (such as oil spills, forest fires etc.) are examples of situations where such a cooperative game approach is beneficial. 
+\chapter{\textbf{Addendum}: Optimal Vehicle-Target Assignment}
+This section provides a brief overview of some---as yet unsubstantiated---work I did formulating the TA problem for MAS as a vehicle-target assignment problem that is well known in game theory. The advantages this approach provides are strict bounds on how well a centralized vs.~decentralized system can perform, given a set of constraints. Formulating TA as target assignment provides a direct analogy to the \emph{0-1 Integer Knapsack Problem} which indicates that no polynomial time algorithm is currently known to solve the proposed problem, albeit, the additional constraints imposed by a real robotic system may in-fact provide a fast solution.
 
-Most recent work in distributed welfare games\cite{Marden2008, Marden2013} assumes that players are, in general, non-cooperative. While a comprehensive study of the vehicle-target assignment problem has been done by Arslan et al.\cite{Arslan2007}, the authors do not discuss the specific scenario discussed in this paper.
+I inspect the cooperative, distributed welfare game of vehicle-target assignment with welfare functions that are not sub-modular, but are instead based on target specific threshold values and player-target assignment constraints. Target threshold values define individual agent payoffs depending on the size of the group. One can imagine cooperative scenarios where a group must attain at least some minimum size to successfully complete a task. Tasks such as real-time mapping, object detection and containment, etc. fall into this category. Such tasks can often be seen as a special flavor of the vehicle-target assignment problem where players groups of a certain size  must pick the same target to successfully complete their mission and receive a non-zero payoff.
 
-Since target thresholds remove the submodularity property from welfare functions for this game, work on valid utility games by Vetta et al.\cite{Vetta2002} cannot be used in this circumstance and additional analysis must be done to predict bounds on PoA/PoS.
+Most recent work in distributed welfare games\cite{Marden2008, Marden2013} assumes that players are, in general, non-cooperative. While a comprehensive study of the vehicle-target assignment problem has been done by Arslan et al.\cite{Arslan2007}, the authors do not discuss the specific scenario discussed in this section. Since target thresholds remove the submodularity property from welfare functions for this game, work on valid utility games by Vetta et al.\cite{Vetta2002} cannot be used in this circumstance and additional analysis must be done to predict bounds on PoA/PoS.
 
-\subsection{Problem Setup and Example}
+\section{Problem Setup and Example}
 The cooperative game is set up as follows:
 \begin{itemize}
 	\item Players: $\Pl = \{1,2,3,\ldots, N\}$.
@@ -881,10 +889,10 @@ Global welfare values for this example are listed in Table \ref{tab:mcgw}. Note 
 	\centering\caption{Global welfare for the vehicle-target assignemt example scenario with target thresholds and player constraints.}\label{tab:mcgw}
 \end{table}
 
-\subsection{Selecting Utility Functions}
+\section{Selecting Utility Functions}
 We discuss the effects that choosing different utility functions has for this example scenario. We discuss two utility functions, marginal contribution and Shapley value utility, and apply log-linear learning to observe equilibria of the system under both utility design choices.
 
-\subsubsection{Marginal Contribution (MC) Utility}
+\subsection{Marginal Contribution (MC) Utility}
 MC utility gives us two important and desirable properties for a good utility function, existence and efficiency of NE. NE existence is guaranteed because the chosen binary welfare function is anonymous and  depends only on the number of vehicles assigned to a target\cite{Monderer1996}. Given that the global objective function is just a counting function that counts the total number of successfully assigned targets, we can show that a maximum assignment is always an NE of the system as it results in maximum player payoffs (see proof in \textbf{Price of Stability} section). Player utility values using MC utility are listed in Table \ref{tab:mcUtil}.  
 
 \begin{table}[!htb]
@@ -995,7 +1003,7 @@ Averaging over 1000 runs of log-linear learning for 1000 iterations each and usi
 
 As is evident from these results, applying log-linear learning using MC utility converges the system to perfect target assignment if a perfect assignment can be made. The NE in blue are all cases of perfect assignment while the equilibria in red are cases of successful assignment but do not maximize global welfare. We now look at what happens when Shapley value utility is used instead of MC for this game.
 
-\subsubsection{Shapley Value (SV) Utility}
+\subsection{Shapley Value (SV) Utility}
 Using SV utility, each player's utility for selecting target, $t \in \Ta$, can be computed using the simplified equation,
 \begin{align}
 	U_i(t, a_{-i}) & = \left\{
@@ -1113,7 +1121,7 @@ In this case, the worst NE has the highest likelihood of being chosen by log-lin
 
 In this example case it is clearly a better idea to use MC over SV when picking an appropriate utility function for this system to do optimal target assignment.
 
-\subsection{Price of Anarchy/Stability Analysis}
+\section{Price of Anarchy/Stability Analysis}\label{sec:poapos}
 PoA for this game is only defined under specific conditions for this vehicle-target assignment problem. The global welfare for the worst NE of the game can be $W_{NE}^{bad} = 0$, e.g. $|\Pl| = 3$, $|\Ta| = 3$, $c_i = \Ta$ $\forall i \in \Pl$, $k_t = 3$ $\forall t \in \Ta$. If every agent is assigned a unique target in this situation, then the system is at an equilibrium and no agent has any incentive to unilaterally deviate since they cannot improve their respective payoff or the global system welfare. In such a situation $W_{NE} = 0$ and thus $PoA = W_{OPT} / W_{NE}^{bad}$ would be undefined (or infinite).
 
 In general, $W_{NE}^{bad} \not= 0$ when: for all actions in the valid action set, there must exist a target-$t$ such that it is either successfully assigned or is one agent away from being successfully assigned and an agent-$p$ exists that is not assigned to $t$ in the current action but has $t$ in it's target constraint set ($t \in c_p$, $a_p \not= t$).
@@ -1136,7 +1144,7 @@ If the second case is true then player-$i$ switch did nothing to the global welf
 
 Finally, if this player's deviation from $a^{OPT}$ to $a'$ resulted in a better payoff for any other reason, it means the new target chosen $a'_i$ was not successfully assigned in action $a^{OPT}$ but has been successfully assigned in action $a'$. This would imply $W(a') > W(a^{OPT})$ since action $a'$ now has one new successfully assigned target, $a'_i$. This would result in a contradiction since that would imply $a^{OPT}$ was never an optimum. Which means that no player-$i$ would deviate from $a^{OPT}$ for any reason, thereby making $a^{OPT}$ a NE. $a^{OPT}$ is also the best NE, $W(a^{OPT}) = W_{NE}^{best}$ by it's very definition and so PoS for this game is always 1.
 
-\subsection{Finding Optimal Welfare}
+\section{Finding Optimal Welfare}
 Since the global welfare function is essentially a counting function (1 for targets that have been successfully assigned, 0 otherwise), it is maximized by maximizing the number of successfully assigned targets.
 
 In the simplistic case when $k_t = k$ $\forall t \in \Ta$, and $c_i = \Ta$ $\forall i \in \Pl$, the maximum welfare is,
@@ -1150,19 +1158,11 @@ In the simplistic case when $k_t = k$ $\forall t \in \Ta$, and $c_i = \Ta$ $\for
 	& = \min\left(\left\lfloor\frac{N}{k}\right\rfloor, M\right)
 \end{align}
 
-In the more complex case when $k_t$'s are not all the same value, the optimal welfare is found by maximizing the number of targets that can be successfully assigned. This is equivalent to a well studied problem in computer science called the \textbf{0-1 Integer Knapsack Problem} which, when posed as an optimization problem, is known to be NP-hard. This means that no polynomial time (in M) algorithm exists that can assign players to targets to maximize system utility---which makes finding $W^{OPT}$ and in turn, PoA/PoS for this game, a difficult problem for large values of $M$. For many practical purposes, a pseudo-polynomial time algorithm exists to solve the knapsack problem.
+In the more complex case when $k_t$'s are not all the same value, the optimal welfare is found by maximizing the number of targets that can be successfully assigned. This is equivalent to a well studied problem in computer science called the \textbf{0-1 Integer Knapsack Problem} which, when posed as an optimization problem, is known to be NP-hard. I have not formally worked out the reduction from target assignment to knapsack but would be excited to do so, given enough time. This means that no polynomial time (in M) algorithm exists that can assign players to targets to maximize system utility---which makes finding $W^{OPT}$ and in turn, PoA/PoS for this game, a difficult problem for large values of $M$. For many practical purposes, a pseudo-polynomial time algorithm exists to solve the knapsack problem.
 
 Finally, re-introducing player constraints makes finding $W_{OPT}$ an even more complicated affair and I have not studied this further, as yet. This would be a good future direction to take this preliminary work in.
 
 There are a number of further questions one can ask about the class of games discussed in this section. My goal was mainly to show that game theory can be a viable alternative means to study cooperative scenarios with the system restrictions mentioned in this paper. While my bounds on PoA are not particularly satisfying, and rather obviously inferred just by thinking about such systems, perhaps a deeper analysis of the problem can provide exact values for PoA under special conditions\ldots Probably involving ratios between $|\Pl|$, $|\Ta|$ and $k_t$.
-
-When thinking about finding the optimal global welfare for this class of games, I realized that switching the problem around on it's head effectively invents a new method for solving the Knapsack Problem. All one has to do is define the knapsack problem as a cooperative game with target threshold values and performing log-linear learning on \emph{that} problem would give you an approximate solution to the original Knapsack problem!
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Conclusion}
-
 
 
 
