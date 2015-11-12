@@ -853,28 +853,32 @@ Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed
 \centering\caption{This flowchart describes the control flow for the individual agent controller of the centralized optimal assignment method.}\label{fig:centralagentcontrol}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Distributed Response Threshold Assignment}
-Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
-
-Each agent's probability to collaborate with the team sharing its target at a given instance of time is computed using the logistic sigmoid function and by two agent level parameters, $\tau$ and $\theta$.
-\begin{equation}\label{eq:sig}
-	\Sig(\tau, \theta, x) = \frac{1}{1 + e^{\theta(\tau - x)}} 
-\end{equation}
-$\tau$ is the average team size required to complete the given task at the target location as estimated by each individual robot using on-board sensory information and prior knowledge of the system. The $\theta$ parameter controls the allowed variance in the mean team size making it more likely for an agent to collaborate even if the measured team size, $x$, is far from the required team size, $\tau$. The relationship between $\tau$, $\theta$ and $x$ in Eq \eqref{eq:sig} imparts a continuous response threshold strategy in agents where $x$, the current team size at the target location, is the input stimulus and $\tau$ is the internal threshold for collaboration. When $x$ is $\geq \tau$ the probability to collaborate increases sharply based on the slope of $\Sig$ which, in turn, is controlled by $\theta$.
-
 \begin{figure}[!ht]
 \centering\includegraphics[width=.5\columnwidth]{../assets/DistributedController.png}
 \centering\caption{This flowchart describes the control flow for an indiviaul agent's controller in the de-centralized response threshold based optimal assignment method.}\label{fig:distcontrol}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Distributed Response Threshold Assignment}
+%Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
+
+%Each agent's probability to collaborate with the team sharing its target at a given instance of time is computed using the logistic sigmoid function and by two agent level parameters, $\tau$ and $\theta$.
+%\begin{equation}\label{eq:sig}
+%	\Sig(\tau, \theta, x) = \frac{1}{1 + e^{\theta(\tau - x)}} 
+%\end{equation}
+%$\tau$ is the average team size required to complete the given task at the target location as estimated by each individual robot using on-board sensory information and prior knowledge of the system. The $\theta$ parameter controls the allowed variance in the mean team size making it more likely for an agent to collaborate even if the measured team size, $x$, is far from the required team size, $\tau$. The relationship between $\tau$, $\theta$ and $x$ in Eq \eqref{eq:sig} imparts a continuous response threshold strategy in agents where $x$, the current team size at the target location, is the input stimulus and $\tau$ is the internal threshold for collaboration. When $x$ is $\geq \tau$ the probability to collaborate increases sharply based on the slope of $\Sig$ which, in turn, is controlled by $\theta$.
+
+When the central controller stops receiving perfect information about the system it's behavior quickly becomes non-ideal. For example, if the perception of task magnitude $\tau$ becomes noisy then agents are often assigned non-optimally and resources are wasted. The response threshold task allocation strategy can be employed to mitigate this effect. Once again taking the firefighting scenario into account. If a non-ideal team size is assigned to a fire by a central controller due to imperfect estimation of fire size, then it should still be viable to hold off from starting the containment process until a more reasonable number of agents arrives at the fire. This is important as agents have only a finite amount of resources to complete their assigned tasks. In the case of firefighting, this resource may be the amount of fire repellent being carried on energy stores of the robot.
+
+The experiments outlined here study the effect of applying response threshold task allocation in a group after it has been assigned to a task using the centralized control strategy outlined earlier. We compare this to a case where the agents assigned to tasks directly begin the collaborative process without individual sensing and, consequently, applying the response threshold strategy. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
-We use the Droplet swarm robot platform to perform experiments to study both the centralized and distributed approaches to TA mentioned in the previous section. Through the use of these experiments we show that a centralized approach is always preferred in situations where perfect information about the system is discernible but the optimality of the centralized approach quickly drops off as soon as this requirement is not met. In systems with imperfect information a distributed approach is often preferred when 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
-
+We see two interesting results of applying the response threshold strategy to agents after they have been assigned tasks. First off, the number of attempted tasks is reduced when compared to both centralized (ideal and noisy) cases. 
 
 
 
