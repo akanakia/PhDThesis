@@ -84,8 +84,17 @@
 \newcommand{\td}{\mathbf{t}}   % response-threshold value
 \newcommand{\xm}{x_{\hat{m}}}
 
+\def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip2em
+  \hbox{}\nobreak\hfil(#1)%
+  \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
+
+\newsavebox\mybox
+\newenvironment{aquote}[1]
+  {\savebox\mybox{#1}\begin{quote}}
+  {\signed{\usebox\mybox}\end{quote}}
+
 % ------------------------------ DOCUMENT TITLE SETUP -------------------------
-\title{An Analysis of Response Threshold Based Task Assignment Strategies in Multi-Agent Systems Performing Concurrent Benefit Tasks with Limited Information}
+\title{Response Threshold Based Task Allocation in Multi-Agent Systems Performing Concurrent Benefit Tasks with Limited Information}
 
 \author{A.~P.}{Kanakia}
 
@@ -355,6 +364,68 @@ The different methods discussed in this section are widely used for modeling and
 \end{enumerate}
 
 The following sections use at least a few of these methodologies to define and analyze new task-assignment strategies for multi-agent systems. In Chapter~\ref{ch:optimization} I use all of these methods and results from the following two chapters to propose a generalized framework for optimal control of a robot swarm.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Designing an Optimal Control Model for Multi-Agent Systems}\label{ch:model}
+We begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an 0-1 IP problem which optimizes a desired welfare function. The constraints for the IP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known P-NP computational complexity model from computer science follows. Subsequently, we show that relaxing just one of the TA problem constrains results in an obvious centralized polynomial time greedy solution. Since the goal of this paper is to discuss bounds on the performance of \emph{distributed} approaches for solving TA, we compare the relaxed TA centralized algorithm with an analogous decentralized solution on a swarm of individually simple robots. We then re-introduce previously removed constraints and describe the complexities involved in designing a distributed solution of the TA problem. A theoretical comparison between centralized vs. decentralized approaches is once again afforded to us using the concepts of Price of Anarchy (PoA) and Price of Stability (PoS) from game theory. Finally, these theoretical results are backed up by simulated and real robot experiments.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Problem Setup}\label{sec:setup}
+The TA problem is formally defined as follows:
+\begin{itemize}
+	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
+	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
+	\item Target Threshold: $K:\Ta \to \mathbb{Z}^+$\\
+	The number of agents required to successfully attempt task-$t_j$ is $= K(t_j)$, which is shortened to $k_j$ for brevity.
+	
+	\item Agent Constraints: $C:\Pl \to \hat{\Ta} \subseteq \Ta$\\
+	The set of constraints for agent-$n_i$ ($= C(n_i)$) is the subset of targets that this agent can reach. It is shortened to $c_i$ for brevity.
+	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of 0-1 elements $x(n_i, t_j)$ or $x_{ij}$ for short, that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
+	\begin{equation}\label{eq:X}
+		X = \left(\begin{array}{ccc}
+			x_{11} & \ldots & x_{1|\Ta|}\\
+			\vdots & \ddots & \vdots\\
+			x_{|\Pl|1} & \ldots & x_{|\Pl||\Ta|}
+		\end{array}\right)
+	\end{equation}
+	\item Target Assignments: $A:\Ta \to \hat{\Pl} \subseteq \Pl$\\
+	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity. From~\eqref{eq:X} we can define
+\begin{equation}\label{eq:aj}
+	|a_j| = \sum\limits_{i = 1}^{|\Pl|} x_{ij}
+\end{equation}
+	\textbf{Definition:} A target is considered ``successfully assigned'' when $|a_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
+	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a_j| = k_j$.
+	\item Target specific welfare function,
+\begin{align}\label{eq:wf}
+	W(t_j, |a_j|) & = \left\{
+	\begin{array}{ll}
+		w_j & |a_j| \geq k_j\\
+		0 & o/w
+	\end{array}\right.
+\end{align}
+	\item Global welfare function,
+\begin{align}\label{eq:gwf}
+	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
+\end{align}
+\end{itemize}
+Given this problem setup our goal is to maximize the number of successful assignments of targets which in turn maximizes the global welfare while taking into account all agent constraints and target thresholds.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An Example}\label{sec:example}
+The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
+\begin{itemize}
+	\item Agent: $\Pl = \{1,2,3,4\}$
+	\item Targets: $t \in \Ta = \{a, b, c\}$
+	\item Target thresholds: $k_a = k_b = k_c = 2$
+	\item Agent constraints: $c_1 = c_3 = \{a, b\}$ and $c_2 = c_4 = \{b, c\}$
+	\item Target specific welfare function: $W(t_j, |a_j|) = 1$ (if $|a_j| \geq k_j$), $0$ otherwise.
+	
+\end{itemize}
+\begin{figure}[!htb]
+	\centering\includegraphics[width=5.5cm]{../assets/ex1.png}
+	\centering\caption{A cooperative game with 4 players and 3 targets. Gray pegs indicate the target's minimum threshold value while the arrows depict player assignment constraints.}\label{fig:ex1}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment}\label{ch:existeqrtm}
@@ -737,71 +808,15 @@ In this chapter I presented a multi-agent collaboration algorithm to recruit an 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Designing an Optimal Control Model for Multi-Agent Systems}\label{ch:optimization}
-We begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an 0-1 IP problem which optimizes a desired welfare function. The constraints for the IP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known P-NP computational complexity model from computer science follows. Subsequently, we show that relaxing just one of the TA problem constrains results in an obvious centralized polynomial time greedy solution. Since the goal of this paper is to discuss bounds on the performance of \emph{distributed} approaches for solving TA, we compare the relaxed TA centralized algorithm with an analogous decentralized solution on a swarm of individually simple robots. We then re-introduce previously removed constraints and describe the complexities involved in designing a distributed solution of the TA problem. A theoretical comparison between centralized vs. decentralized approaches is once again afforded to us using the concepts of Price of Anarchy (PoA) and Price of Stability (PoS) from game theory. Finally, these theoretical results are backed up by simulated and real robot experiments.
+\chapter{Comparing Centralized vs. Hybrid Approaches to Task Allocation}
+\begin{aquote}{Starcraft: The spirit of \emph{Tassadar} to \emph{Zeratul}}
+\textit{``The zerg were\ldots altered. A single overriding objective was forced on them\ldots the destruction of our people. The Overmind was formed with thought and reason but not with free will.''}
+\end{aquote}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problem Setup and Example}\label{sec:setup}
-The TA problem is formally defined as follows:
-\begin{itemize}
-	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
-	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
-	\item Target Threshold: $K:\Ta \to \mathbb{Z}^+$\\
-	The number of agents required to successfully attempt task-$t_j$ is $= K(t_j)$, which is shortened to $k_j$ for brevity.
-	
-	\item Agent Constraints: $C:\Pl \to \hat{\Ta} \subseteq \Ta$\\
-	The set of constraints for agent-$n_i$ ($= C(n_i)$) is the subset of targets that this agent can reach. It is shortened to $c_i$ for brevity.
-	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of 0-1 elements $x(n_i, t_j)$ or $x_{ij}$ for short, that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
-	\begin{equation}\label{eq:X}
-		X = \left(\begin{array}{ccc}
-			x_{11} & \ldots & x_{1|\Ta|}\\
-			\vdots & \ddots & \vdots\\
-			x_{|\Pl|1} & \ldots & x_{|\Pl||\Ta|}
-		\end{array}\right)
-	\end{equation}
-	\item Target Assignments: $A:\Ta \to \hat{\Pl} \subseteq \Pl$\\
-	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity. From~\eqref{eq:X} we can define
-\begin{equation}\label{eq:aj}
-	|a_j| = \sum\limits_{i = 1}^{|\Pl|} x_{ij}
-\end{equation}
-	\textbf{Definition:} A target is considered ``successfully assigned'' when $|a_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
-	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a_j| = k_j$.
-	\item Target specific welfare function,
-\begin{align}\label{eq:wf}
-	W(t_j, |a_j|) & = \left\{
-	\begin{array}{ll}
-		w_j & |a_j| \geq k_j\\
-		0 & o/w
-	\end{array}\right.
-\end{align}
-	\item Global welfare function,
-\begin{align}\label{eq:gwf}
-	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
-\end{align}
-\end{itemize}
-Given this problem setup our goal is to maximize the number of successful assignments of targets which in turn maximizes the global welfare while taking into account all agent constraints and target thresholds.
-
-The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
-\begin{itemize}
-	\item Agent: $\Pl = \{1,2,3,4\}$
-	\item Targets: $t \in \Ta = \{a, b, c\}$
-	\item Target thresholds: $k_a = k_b = k_c = 2$
-	\item Agent constraints: $c_1 = c_3 = \{a, b\}$ and $c_2 = c_4 = \{b, c\}$
-	\item Target specific welfare function: $W(t_j, |a_j|) = 1$ (if $|a_j| \geq k_j$), $0$ otherwise.
-	
-\end{itemize}
-\begin{figure}[!htb]
-	\centering\includegraphics[width=5.5cm]{../assets/ex1.png}
-	\centering\caption{A cooperative game with 4 players and 3 targets. Gray pegs indicate the target's minimum threshold value while the arrows depict player assignment constraints.}\label{fig:ex1}
-\end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Comparing Centralized vs. Distributed Approaches to Target Assignment}
-In this section we present two approaches to solving the TA problem, one centralized and one distributed. The advantages and drawbacks of both algorithms are discussed briefly here. A more in-depth comparative discussion including performance bounds analysis follows in section discussion.
-
-\subsection{Centralized Optimal Assignment}
-Using the problem formulation from the previous section we can pose the TA optimization problem as a 0-1 IP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving IPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, as TA is a well studied problem in a number of different fields, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets, most existing computers can find TA solutions well within the physical movement time-frame of robots. 
+Chapter~\ref{ch:model} sets up a formal model for defining task allocation in multi-agent systems. In doing so, it also presents a valid definition of optimal task allocation by formulating the problem as an integer program. The solution to this ILP is a mapping from agents to targets that would result in maximized system utility. Therefore, a natural next step would be to design a controller for the system that could communicate with agents and provide them with these optimal assignments.
+ 
+\section{Centralized Optimal Assignment}
+Using the problem formulation from Chapter~\ref{ch:model} we can pose the TA optimization problem as a 0-1 IP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving IPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, as TA is a well studied problem in a number of different fields, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets, most existing computers can find TA solutions well within the physical movement time-frame of robots. 
 
 The major caveat for using a centralized algorithm is that the central controller is assumed to have perfect knowledge of the operational environment and model parameters for the task being accomplished. Since this information is almost always subject to the accuracy constraints of the sensors making on-field measurements as well as the accuracy of the underlying model whose parameters are being optimized, a centralized method is not always feasible. Nonetheless, we study the effects of using a centralized controller assuming perfect system information as a baseline---being the best possible performance a multi-agent system can achieve for TA.
 
@@ -839,7 +854,7 @@ Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Distributed Response Threshold Assignment}
+\section{Distributed Response Threshold Assignment}
 Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
 
 Each agent's probability to collaborate with the team sharing its target at a given instance of time is computed using the logistic sigmoid function and by two agent level parameters, $\tau$ and $\theta$.
