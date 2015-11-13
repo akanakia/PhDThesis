@@ -175,31 +175,58 @@ All of the aforementioned work uses continuous response threshold (CRT) function
 The development of multi-agent TA draws a very clear picture of its evolution from a behavioral model for insect colonies, developed by ethologists, to an inspired algorithmic model for adaptive MASs \cite{Krieger2000}. While biologists have provided ample empirical evidence to the success of the RT model in predicting and matching observed swarm behavior for TA, there has been no formal argument as to why natural systems gravitate towards this approach compared to other TA strategies such as leader-follower algorithms \cite{Chen2011} or market-based approaches \cite{Amstutz2008,Vig2007}; see \cite{Kalra2006} for a comparative study. My aim is to show for the first time that agent-level RT strategies drive a swarm system to some notion of equilibrium and consequently, system-level control which makes them an obvious choice for modeling natural systems and engineering artificial ones.
 
 \section{Main Contribution and Overview}
-%- Apply global games theory and results to the domain for swarm intelligence (both swarm robotics and social insects)
-%
-%- Show that response thresholds lead to an equilibrium strategy.
-%
-%- Show that optimal task allocation becomes comparable to a threshold-based policy under the influence of noise. 
-%
-%- shown that threshold based task allocation using sigmoidal response threshold functions generalizes fixed-group task allocation ("stick pulling") and random task allocation, allowing to tune a trade-off between exploration and exploitation via the slope parameter (DARS paper)
-From the Related Works section it is clear that MAS TA is an important problem to solve if we want robots to one day collaboratively complete complex tasks in a distributed manner without human intervention even under noisy sensory conditions. With this goal in mind I present my analysis of RT based TA strategies in MAS.
+It is clear that MAS TA is an important problem to solve if we want robots to one day collaboratively complete complex tasks in a distributed manner without human intervention even under noisy sensory conditions. With this goal in mind I present my RT based TA strategies for MAS.
 
-Chapter~\ref{ch:background} provides an outline of existing swarm modeling techniques, particularly multi-level abstraction using probabilistic finite state machines (PFSMs) and rate equations. Readers familiar with these techniques may skip this tutorial chapter and move straight to Chapter~\ref{ch:existeqrtm}. 
+Chapter~\ref{ch:background} provides an outline of existing swarm modeling techniques, particularly multi-level abstraction using probabilistic finite state machines (PFSMs) and rate equations. Terms commonly used throughout this dissertation are also defined here. Readers familiar with swarm modeling techniques may skip this tutorial chapter and move straight to Chapter~\ref{ch:existeqrtm}. 
+
+
 
 The concept of global games from Game Theory lends an important result proving the existence of a Bayesian Nash equilibrium (BNE) when using threshold based strategies (as opposed to other distributed methods for TA) in systems where agents have imperfect information about the environment. The proof of the above statement forms the basis for Chapter~\ref{ch:existeqrtm}. This section also proves another theorem generalizing DRT based models to CRT models for TA. Due to a heavy reliance on game theory formalism for proofs of the two theorems, Section~\ref{sec:ggoverview} of Chapter~\ref{ch:existeqrtm} provides a brief introduction to the theory of global games and can be skipped by readers familiar with the material.
 
 Extending upon the global game theorems, Chapter~\ref{ch:resthmodel} experimentally shows that the DRT strategy is a special case of CRTs when the slope of the sigmoid threshold function approaches infinity, and thus the step-function behavior can be accurately reproduced by the latter. In practice, varying the slope of the RT function allows us to balance exploration and exploitation in the system \cite{Bonabeau1997}. In this chapter I also introduce the CRT model for TA that is central to my study. The CRT model involves agents using a logistic function with two tunable parameters to control the mean and variance of desired team size formation. I analyze and verify this model using real robot experiments as well as simulation results. It is worth noting that biological systems do not necessarily implement sigmoid functions but that they might naturally emerge from a combination of a DRT and noise in the perception system, which I show analytically in Chapter~\ref{ch:existeqrtm}. 
 
-The final chapter of this dissertation provides a comparison between the CRT strategy of TA discussed thus far and an optimal centralized strategy with real experiments using the Droplet swarm robot platform. The entire problem of centralized TA with perfect information is formalized using common notation from game theory and optimization. A clear parallel is drawn between this problem and a number of equivalent problems from different fields, namely, resource allocation, multiple integer knapsack, 0-1 Integer Program (IP) and vehicle-target assignment. Centralized TA is then specifically presented as a 0-1 IP to promote the use of an SMT solver which acts as the core computational engine of the central robot controller in the following experiments. The state machines for the central controller and robots is also presented here. The purpose of these experiments is to show that while centralized TA is considerably better than any distributed approach to TA, this advantage is quickly lost when perfect system information and communication become unavailable. Under these circumstances, a robust distributed approach using the CRT strategies presented in the previous two chapters becomes much more desirable than relying on a central controller. An in-dept analysis and discussion presented in this section provides verifiable proof of the advantages of distributed RT strategies for TA in MAS.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Background on Swarm System Modeling Techniques}\label{ch:background}
-This chapter is designed to give the reader an introductory lesson on swarm system modeling approaches widely used by the swarm robotics community. This involves the use of PFSMs to mathematically describe individual agent behavior as well as solving systems of coupled ODEs, often termed \emph{rate equations}, to divine macroscopic level properties of the system. These are common tools of the trade for modeling many different kinds of dynamical systems---not just MAS---and as such, if the reader is familiar with these approaches they are encouraged to skip this chapter and move on to Chapter~\ref{ch:resthmodel}.
+This chapter is designed to give the reader an introductory lesson on swarm system modeling approaches widely used by the swarm robotics community. Terms used commonly throughout this paper are also defined in the next section. Modeling robot swarms often involves the use of PFSMs to mathematically describe individual agent behavior as well as solving systems of coupled ODEs, often termed \emph{rate equations}, to divine macroscopic level properties of the system. These are common tools of the trade for modeling many different kinds of dynamical systems---not just MAS---and as such, if the reader is familiar with these approaches they are encouraged to skip this chapter and move on to Chapter~\ref{ch:resthmodel}.
 
-The first step in the robot controller design methodology is to describe the swarming task being studied. The general strategy used by each individual agent in the swarm is defined and later translated into a viable microscopic model. A hypothesis for the observed, collective behavior of the swarm is supplied, which is later quantified into a mathematical macroscopic model.
+The first step in the robot controller design methodology is to describe the swarming task being studied. The general strategy used by each individual agent in the swarm is defined and later translated into a viable agent-level, or microscopic model. A hypothesis for the observed, collective behavior of the swarm is supplied, which is later quantified into a system-level or macroscopic model.
 
-Physical characteristics of the swarm system are generally described in the experiment setup as well. These may include environmental variables such as arena size, agents' properties such as speed, communication and sensing radii, the computation power of each individual in the swarm, etc. This is an important step in identifying important system parameters that affect the outcome of the experiment, versus the environmental and agent based values that can be abstracted away when designing micro and macro-level models.
- 
+Physical characteristics of the swarm system are generally described in the experiment setup as well. These may include environmental variables such as arena size, agents' properties such as speed, communication and sensing radii, the computation power of each individual in the swarm, etc. This is an important step in identifying important system parameters that affect the outcome of the experiment, versus the environmental and agent based values that can be abstracted away when designing models at different levels of abstraction.
+
+\section{Terms}
+\subsection{Agent or Robot}
+Russel and Norwig \cite{Russel1995} define an agent or robot as ``Anything that can be viewed as perceiving its environment through sensors and acting upon that environment through effectors.'' While this definition is sufficient in most cases, it excludes a swarm system's propensity for communication. Therefore, an enhanced definition for a swarm robot could be: 
+\begin{quote}
+Any mechanical automation capable of sensing it's surroundings, processing sensory inputs via internal computation, actuating itself or other objects in the environment based on the inputs, and communicating information with other robots around it, either directly or via \emph{stigmergy}.
+\end{quote}
+
+\subsection{Stigmergy}
+Stigmergy is a term used to describe indirect communication in robot swarms. The word was first coined by Pierre-Paul Grass\'e, in his 1959 paper \cite{Grasse1959}, while studying insect behavior and has become a commonly used term also in the swarm robotics community. 
+
+While most robots are capable of communicating amongst themselves explicitly via infrared, Bluetooth\texttrademark, and other wired or wireless means, most swarm algorithms try to keep such explicit communication to a minimum. This is done to maintain scalability of the system (e.g., prevent message flooding) and keep the underlying algorithm simple.
+
+Indirect methods of communication are thus preferred when designing controllers for robot swarms, such as changing one's color or moving in a particular pattern or even just waiting at a specific position in the environment. The process of adding information to the swarm system by affecting or altering the environment rather than explicitly communicating with other agents is referred to as a stigmergic process \cite{Balch2005}. It is used in many of the swarm algorithms discussed in this paper.
+
+
+\subsection{Swarm System}
+A myriad of definitions are available for systems and models that exhibit ``swarming'' phenomena---the term ``swarming'' itself being re-defined in numerous cases. An interesting discussion of the nomenclature of swarm systems is available in \cite{Beni2005,Beni2005a}.
+
+Since our primary purpose in modeling robot swarms is to study and understand properties of the system as a whole, the term \emph{swarm system} or \emph{multi-agent system} (MAS) is not used just as a collective noun for a group of robots but instead describes the complex relationship between agents, the environment, and the tasks they are attempting to accomplish.
+
+Multi-agent systems can be modeled at different levels of abstraction depending on the system properties we attempt to expose. When these models are used in tandem we gain the ability to both, verify and enhance the original swarm system via optimization of system parameters. We see the deployment of this strategy in the next section but first, we define the different abstraction levels used in robot swarm modeling.
+
+
+\subsection{Microscopic Level}
+The micro-level of a MAS model treats the individual agent as the fundamental unit of the model \cite{Lerman2001a}. Though not a requirement for this form of agent-based modeling, we generally assume that the swarm is homogeneous, i.e.\ every agent is running the same robot controller within it and all hardware (sensors, actuators, processors and communication devices) between robots is identical. The microscopic level then helps describe direct agent-agent interactions as well as agent-environment interaction. 
+
+An example of micro-level modeling consists of writing down the dynamics equations (equations of motion) for an individual robot and solving them to study system-level behavior. As one can imagine, these dynamics equations can become very tedious and difficult to solve for more complex swarm systems due to the high number of agents, inelastic collisions between agents and obstacles, sensor and actuator noise, etc. Therefore a more common approach to micro-level modeling involves stochastic simulation of individual robot controllers in parallel, ignoring individual trajectories and positions. This micro-level modeling method has been derived from the popular \emph{Gillespie} method \cite{Gillespie1976,Gillespie1977} used to model coupled chemical reactions. Another example of microscopic model---with a much lower level of abstraction---is a simulator that simulates the motion and possibly collisions among robots. 
+
+
+\subsection{Macroscopic Level}
+While micro-level models deal with systems on an individual agent level, macro-level models consider the system as a whole,and are used to describe collective group behavior. Macro-models for robot swarms are often phenomenological in nature. The system's parameters are derived from observing and measuring real physical phenomena and extrapolating such properties as may be deemed useful for understanding said phenomena. Macro-level models are generally represented as a system of ordinary (for non-spatial models) or partial (for spatial models) differential equations and as such are good at describing the temporal and spatial evolution of the system. They are often also referred to as population dynamics models and/or rate equations in literature.
+
 \section{Designing the Controller Construct}
 Creating a logic construct---a flowchart, state-machine or algorithm---that describes the desired robot behavior for the given task is an important step in the MAS modeling process. When studying non-spatial models, the robot controller can be characterized by an FSM with a discrete number of states under urgent time-step driven semantics, as seen in Figure~\ref{fig:allfsm}. The states in the FSM ($s_1, s_2, s_3$ \& $s_4$) represent physical states that the robot can be in, such as  \emph{searching}, \emph{waiting}, etc. and can be directly derived from the program code running on the robot. One can think of each state as being an \emph{action} that the robot is currently performing based on stimulus from the environment and other robots. These stimuli can cause a robot to transition from one state to another and are represented as \emph{conditionals} on the edges of the FSM, $c_i$. These conditionals are equivalent to the decision process blocks in the flowchart and can be derived from:
 \begin{enumerate}
@@ -368,11 +395,12 @@ The following sections use at least a few of these methodologies to define and a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Designing an Optimal Control Model for Multi-Agent Systems}\label{ch:model}
-We begin by setting up the TA problem using concise and well understood nomenclature from game theory. This formulation is then used to set up an 0-1 IP problem which optimizes a desired welfare function. The constraints for the IP evolve naturally out of the game theory formulation as well. A discussion situating the TA problem within the well known P-NP computational complexity model from computer science follows. Subsequently, we show that relaxing just one of the TA problem constrains results in an obvious centralized polynomial time greedy solution. Since the goal of this paper is to discuss bounds on the performance of \emph{distributed} approaches for solving TA, we compare the relaxed TA centralized algorithm with an analogous decentralized solution on a swarm of individually simple robots. We then re-introduce previously removed constraints and describe the complexities involved in designing a distributed solution of the TA problem. A theoretical comparison between centralized vs. decentralized approaches is once again afforded to us using the concepts of Price of Anarchy (PoA) and Price of Stability (PoS) from game theory. Finally, these theoretical results are backed up by simulated and real robot experiments.
+TA is a canonical problem in swarm robotics. With the advent of more sophisticated general purpose robots such as the Baxter, NAO and innumerable UAVs the problem of handling real world tasks collaboratively, be it with other robots or humans, is becoming increasingly important. Many group tasks exhibit a property of concurrent benefit, i.e. single agent attempts to complete the task are guaranteed to fail or waste resources but groups attempting the task together provide a considerable concurrency benefit. A problem oft ignored by MATA model developers is deciding when a group is capable enough to attempt the collaborative task and whether or not simultaneous actions are important to complete the task successfully. While this precise temporal component of attempting tasks concurrently is not the focus of our work, it is important to point out as we make certain assumptions on required task group sizes and how these requirements change with time. In this context TA is distilled down to the process of assigning the required number of agents to particular dynamic tasks without worrying about how agents get to the tasks or what the exact dynamics of agents and these genericized tasks are. 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problem Setup}\label{sec:setup}
-The TA problem is formally defined as follows:
+We assume that tasks or targets (used synonymously throughout this paper) require at least two agents to attempt collaboratively. The major caveat here is that the \emph{exact} number of agents required to attempt a task is unknown and very difficult to accurately discern. Tasks with concurrent benefit share the property that the probability of success depends non-linearly on the collective capabilities and team size of the robots attempting it. In addition, the exact number of agents required to successfully complete the task varies over time due to numerous  complex physical parameters. Many collaborative tasks---particularly those seen in biological systems---exhibit the property of concurrent benefit, ranging from surveillance and coordinated defense of enclosed areas like termite mounds and honey bee hives \cite{breed1990division} to collective transport of heavy objects and even containment of oil spills and forest fires. To contain a large fire, it is insufficient (and inefficient) for a single agent to start putting out the fire without waiting for backup. But the rate of fire containment increases quickly by adding just a few more agents to the group, which illustrates the property of concurrent benefit well.
+
+\section{Multi-Agent Task Allocation Model}
+With this general overview of MATA in mind, we present the following formal model for TA.
 \begin{itemize}
 	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
 	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
@@ -404,15 +432,16 @@ The TA problem is formally defined as follows:
 		0 & o/w
 	\end{array}\right.
 \end{align}
+where $w_j$ can be a value or function defining the utility of completing task-$t_j$ upon successful assignment.
+
 	\item Global welfare function,
 \begin{align}\label{eq:gwf}
 	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
 \end{align}
 \end{itemize}
-Given this problem setup our goal is to maximize the number of successful assignments of targets which in turn maximizes the global welfare while taking into account all agent constraints and target thresholds.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{An Example}\label{sec:example}
+Eqn.~\eqref{eq:gwf} is an objective function that can be maximized to provide an \emph{optimal} assignment of agents to targets. This is in contrast to a lot of existing approaches for MATA where each agent is concerned with maximizing their own utility, making such approaches agent-centric. We, instead, focus on the task as the primary entity for which a utility function is defined and maximized. This approach falls more in line with work such as \cite{shehory1998methods}.
+
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
 \begin{itemize}
 	\item Agent: $\Pl = \{1,2,3,4\}$
@@ -426,6 +455,15 @@ The following example describes a cooperative game with target thresholds and pl
 	\centering\includegraphics[width=5.5cm]{../assets/ex1.png}
 	\centering\caption{A cooperative game with 4 players and 3 targets. Gray pegs indicate the target's minimum threshold value while the arrows depict player assignment constraints.}\label{fig:ex1}
 \end{figure}
+
+\section{Defining Optimality for Multi-Agent Task Allocation}
+Consider a simplified forest firefighting scenario where a number of isolated fires and flame fronts exist in a specified geographic region. Our goal is to contain all of the fires and prevent them from spreading or, at the very least, contain as many as we can given our manpower. If the fires did not evolve over time and we had perfect information about the threshold value of each target/fire then a central controller would only have to maximize Eqn.~\eqref{eq:gwf} subject to the constraints mentioned in Table~\ref{tab:constraints} and provide the resulting assignment matrix to all the agents. The agents would then move to their assigned fires. Since Eqn.~\eqref{eq:gwf} guarantees successful assignments (if such an assignment is possible) there would be enough robots at each fire to put it out and all the tasks would be complete. 
+
+Clearly this situation --- like most real world situations --- is dynamic, i.e., the size and number of fires changes over time. The task allocation model described in the previous section has no notion of time. We consider constant but repeated optimization of ``snapshots'' of a dynamic problem so that at any given point a solution to the TA problem is valid. The main assumption made here is that maximizing Eqn.~\eqref{eq:gwf} subject to the constraints listed in Table~\ref{tab:constaints} takes considerably less time than the physical evolution of the task magnitudes, and in-turn, the task thresholds. If this is not the case or if, for any other reason, the state of the system is not updated in a central controller then this notion of optimality quickly fails.
+
+Nevertheless, maximizing snapshots of a MATA system with perfect information throughout the course of a prescribed scenario provides a means for defining baseline system-wide optimality. At any given point in time, the optimal solution of a snapshot of the state of the system is the best assignment of targets that agents can be given.
+
+\textcolor{red}{I fully expect the reader to still have a number of questions about the notion of optimality here and perhaps the fact that a formal definition of optimal TA is still missing is a deal-breaker for this section but nevertheless, the discussion above is important to convey the context of this problem.} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment}\label{ch:existeqrtm}
@@ -882,7 +920,10 @@ The experiments outlined here study the effect of applying RT TA in a group afte
 \section{Results}
 We see two interesting results of applying the RT strategy to agents after they have been assigned tasks. First off, the number of attempted tasks is reduced when compared to both centralized (ideal and noisy) cases. 
 
-
+\begin{figure}
+	\centering\includegraphics[width=\textwidth]{../assets/staticExpResults.png}
+	\centering\caption{Simulation experiment results comparing the number of targets attempted and agents assigned versus failed attempts and assignments for centralized control in the ideal and noisy case as well as the hybrid centralized-RT model.}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion of Performance Bounds on Centralized vs.~Distributed Approaches}\label{ref:disc}
