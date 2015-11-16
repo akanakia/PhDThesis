@@ -61,8 +61,6 @@
 }
 
 % - Math
-\newcommand{\vnorm}[1]{\left|\left|#1\right|\right|}
-\newcommand{\tab}{\hspace*{2em}}
 \DeclareMathOperator*{\argminop}{arg\,min\,}
 \DeclareMathOperator*{\argmaxop}{arg\,max\,}
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
@@ -71,17 +69,15 @@
 \newcommand{\argmax}[1]{\underset{#1}{\argmaxop}}
 \newcommand{\D}[2]{\frac{d#1}{d#2}}
 \newcommand{\PD}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\V}[1]{\mathbf{#1}}
-\newcommand{\ubar}[1]{\underline{#1}}
 \newcommand{\abs}[1]{\lvert#1\rvert}
 \newcommand{\Sig}{\mathcal{S}}  % Sigmoid function
-\newcommand{\Pl}{\mathcal{N}} % Player List
+\newcommand{\Pl}{\mathcal{P}} % Player List
 \newcommand{\Ta}{\mathcal{T}} % Targets/Resources
 \newcommand{\We}{\mathcal{W}} % (All) Global Welfare Function
 \newcommand{\Z}{\mathbb{Z}}    % Integers
 \newcommand{\R}{\mathbb{R}}    % Reals
 \newcommand{\N}{\mathbb{N}}   % Naturals
-\newcommand{\td}{\mathbf{t}}   % response-threshold value
+\newcommand{\td}{\Upsilon}   % response-threshold value
 \newcommand{\xm}{x_{\hat{m}}}
 
 \def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip2em
@@ -140,17 +136,38 @@ I am eternally grateful to my colleagues and friends in the robotics lab. Much o
 % ----------------------------- BEGIN DOCUMENT --------------------------------
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter*{Acronyms}
-\begin{itemize}
-	\item \textbf{MAS}:  Multi-Agent System
-	\item \textbf{TA}:   Task Allocation
-	\item \textbf{RT}:   Response Threshold
-	\item \textbf{CRT}:  Continuous Response-Threshold
-	\item \textbf{DRT}:  Discrete Response-Threshold
-	\item \textbf{ODE}:  Ordinary Differential Equation
-	\item \textbf{FSM}:  Finite State Machine
-	\item \textbf{PFSM}: Probabilistic Finite State Machine
-\end{itemize}
+\begin{center}
+\section*{Acronyms}
+\begin{table}[!ht]
+\centering\begin{tabular}{lp{8.5cm}}
+	\textbf{MAS} & Multi-Agent System\\
+	\textbf{TA} & Task Allocation\\
+	\textbf{RT} & Response Threshold\\
+	\textbf{CRT} & Continuous Response-Threshold\\
+	\textbf{DRT} & Discrete Response-Threshold\\
+	\textbf{ODE} & Ordinary Differential Equation\\
+	\textbf{FSM} & Finite State Machine\\
+	\textbf{PFSM} & Probabilistic Finite State Machine
+\end{tabular}
+\end{table}
+
+\section*{Symbols Used}
+\begin{table}[!ht]
+\centering\begin{tabular}{lp{8.5cm}}
+	\textbf{Symbol} & \textbf{Description}\\
+	\hline
+	$\Pl$ & Set of agents.\\
+	$\Ta$ & Set of targets or tasks.\\
+	$n_i$ & Single agent $i$.\\
+	$t_i$ & Single target $i$.\\
+	$\tau$ & Target magnitude. $\tau_i$ is the magnitude of task $i$. This may be a constant or a function.\\
+	$u_i$ & Agent level utility. This may be a constant or a function.\\
+	$A(t_j)$ or $a_j$ & Set of agents assigned to target $j$.\\
+	$W(t_j)$ & System welfare for completing a target $j$.\\
+	$\mathcal{N}(\mu, \sigma)$ & Normal or Gaussian distribution with mean $\mu$ and std. deviation $\sigma$.\\
+\end{tabular}
+\end{table}
+\end{center}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}
@@ -402,7 +419,7 @@ We assume that tasks or targets (used synonymously throughout this paper) requir
 \section{Multi-Agent Task Allocation Model}
 With this general overview of MATA in mind, we present the following formal model for TA.
 \begin{itemize}
-	\item Agents/Players: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
+	\item Agents/Robots: $\Pl = \{n_1, n_2, \ldots, n_i, \ldots,n_{|\Pl|}\}$
 	\item Targets: $\Ta = \{t_1, t_2, \ldots, t_j, \ldots,t_{|\Ta|}\}$
 	\item Target Threshold: $K:\Ta \to \mathbb{Z}^+$\\
 	The number of agents required to successfully attempt task-$t_j$ is $= K(t_j)$, which is shortened to $k_j$ for brevity.
@@ -847,20 +864,16 @@ In this chapter I presented a multi-agent collaboration algorithm to recruit an 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Comparing Centralized vs. Hybrid Approaches to Task Allocation}
-\begin{aquote}{Starcraft: The spirit of \emph{Tassadar} to \emph{Zeratul}}
-\textit{``The zerg were\ldots altered. A single overriding objective was forced on them\ldots the destruction of our people. The Overmind was formed with thought and reason but not with free will.''}
-\end{aquote}
-
 Chapter~\ref{ch:model} sets up a formal model for defining task allocation in multi-agent systems. In doing so, it also presents a valid definition of optimal task allocation by formulating the problem as an ILP. The solution to this ILP is a mapping from agents to targets that result in maximized system utility. Therefore, a natural next step would be to design a controller for the system that could communicate with agents and provide them with these optimal assignments.
 
-For such a centralized approach to be viable, attention must once again be drawn to the fact that the definition of optimality assumes perfect information about the state of the system. If we have multiple agents and targets, then all object positions as well as target magnitudes $\tau_t$ must be known the to the central controller to construct an accurate objective function and constraints. If a central controller has incomplete or inaccurate information about a system then it is very likely the mappings returned by the ILP could result in significant wastage of resources by agents. In such a situation we see how the RT algorithm comes into play to prevent unnecessary task attempts by a group of agents.  This chapter focuses on comparing such a centralized approach with a hybrid approach which uses the RT approach from the previous chapter.
+For such a centralized approach to be viable, attention must once again be drawn to the fact that the definition of optimality assumes perfect information about the state of the system. All object positions as well as target magnitudes $\tau_t$ must be known the to the central controller to construct an accurate objective function and constraints. If a central controller has incomplete or inaccurate information about a system then it is very likely the assignments returned by the ILP could result in significant wastage of resources by agents. In such a situation we see how the RT algorithm comes into play to prevent unnecessary task attempts by a group of agents.  This chapter focuses on comparing such a centralized approach with a hybrid approach which uses the RT strategy from the previous chapter layered upon noisy centralized control.
 
 \section{Centralized Optimal Assignment}
-Using the problem formulation from Chapter~\ref{ch:model} we can pose the TA optimization problem as a 0-1 ILP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving IPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, as TA is a well studied problem in a number of different fields, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets, most existing computers can find TA solutions well within the physical movement time-frame of robots. 
+Using the problem formulation from Chapter~\ref{ch:model} we can pose the TA optimization problem as a 0-1 ILP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving ILPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets, most existing computers can find TA solutions well within the physical movement time-frame of robots. 
 
 The major caveat for using a centralized algorithm is that the central controller is assumed to have perfect knowledge of the operational environment and model parameters for the task being accomplished. Since this information is almost always subject to the accuracy constraints of the sensors making on-field measurements as well as the accuracy of the underlying model whose parameters are being optimized, a centralized method is not always feasible. Nonetheless, we study the effects of using a centralized controller assuming perfect system information as a baseline---being the best possible performance a multi-agent system can achieve for TA.
 
-The IP constraints and objective to maximize are presented below using the terms defined in section~\ref{sec:setup}. 
+The ILP constraints and objective to maximize are presented below using the terms defined in section~\ref{sec:setup}. 
 \begin{align}\label{eq:ilp}
 	\text{Maximize}\hspace{1cm} & \sum\limits_{t \in \Ta} W(t, |A(t)|) = \We\\
 	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
@@ -868,20 +881,7 @@ The IP constraints and objective to maximize are presented below using the terms
 	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
 	& 0 \leq x(n_i, t_j) \leq 1\notag
 \end{align}
-The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 IP since all $x_{ij}$ can only have the value $0$ or $1$. There are a number of system level quantities required for solving Eq \eqref{eq:ilp}, as shown in Table~\ref{tab:ilpquants}.
-
-\begin{table}[!ht]
-\centering\begin{tabular}{|l|p{.65\columnwidth}|}
-\hline
-\textbf{Quantity} & \textbf{Description}\\\hline
-Targets $\Ta$ & An indexed list of targets is required to match individual target thresholds and agent constraints with.\\\hline
-Target Thresholds $K$ & An indexed list of team-size thresholds required to successfully attempt each task. This quantity is often extremely difficult to accurately compute. The number of robots required to complete a task can vary drastically over time due to environmental parameters, agent capabilities, and the class of tasks being performed.\\\hline
-Player Constraints $C$ & An indexed list describing whether or not a particular agent can attempt a particular task. There can be a number of reasons such as an agent's on-board capabilities, path planning issues, and fuel/cost constraints that limit an agent's ability to reach or attempt a particular task. This quantity is, once again, difficult to accurately discern for a large swarm system as the internal state information for every single robot needs to either be available to the central controller or each agent must make a calculated guess as to whether or not it is capable to reaching and performing a particular task and communicate that guess back to the central controller.\\\hline 
-\end{tabular}
-\centering\caption{System level parameters required for solving Eq.\eqref{eq:ilp}}\label{tab:ilpquants}
-\end{table}
-
-Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed to the central controller in a timely fashion we can make the claim that the assignment returned by solving Eq \eqref{eq:ilp} will either be an optimal assignment or that no optimal assignment exists. Also assuming that computation and communication time between the central controller and individual agents is negligible compared to physical agent locomotion times, we can claim that this method is the fastest possible solution for TA in a multi-agent system measured as the rate of task completion.
+The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 ILP since all $x_{ij}$ can only have the value $0$ or $1$, indicating whether or not agent $i$ is assigned to target $j$.
 
 \begin{figure}[!ht]
 \centering\includegraphics[width=.65\columnwidth]{../assets/CentralController.png}
@@ -900,29 +900,30 @@ Assuming each quantity from Table.~\ref{tab:ilpquants} can be accurately relayed
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Distributed Response Threshold Assignment}
-%Extending upon our previous work on response threshold based TA in multi-agent systems, we propose the method outlined in Fig.~\ref{fig:distcontrol} to control team-size dynamics at task sites. Each agent searches for possible collaboration targets and chooses one based on some internal heuristic, often related to minimizing path-planning complexity and energy restrictions. Since, in the distributed approach mentioned here, there is no way for an agent to discern the true magnitude of a particular target without actually inspecting it with its sensors, the choice of target to go to can be made arbitrarily. The methods used to find and select targets are not the major focus of this study and hence assumed to be readily available to each agent. Instead, we study the dynamics of estimating a target's required team size and consequently the probability of successful completion using a response threshold approach.
+When the central controller stops receiving perfect information about the system it's behavior quickly becomes non-ideal. For example, if the perception of task magnitude $\tau$ becomes noisy then agents are often assigned non-optimally and resources are wasted. The RT TA strategy can be employed to mitigate this effect. Once again taking the firefighting scenario into account. If a non-ideal team size is assigned to a task/fire by a central controller due to imperfect estimation of fire size, then it should still be viable to hold off from starting the containment process until a more reasonable number of agents arrives at the fire. This is important as agents have only finite resources to complete their assigned tasks. In the case of firefighting, this resource may be the amount of fire repellent being carried on energy stores of the robot.
 
-%Each agent's probability to collaborate with the team sharing its target at a given instance of time is computed using the logistic sigmoid function and by two agent level parameters, $\tau$ and $\theta$.
-%\begin{equation}\label{eq:sig}
-%	\Sig(\tau, \theta, x) = \frac{1}{1 + e^{\theta(\tau - x)}} 
-%\end{equation}
-%$\tau$ is the average team size required to complete the given task at the target location as estimated by each individual robot using on-board sensory information and prior knowledge of the system. The $\theta$ parameter controls the allowed variance in the mean team size making it more likely for an agent to collaborate even if the measured team size, $x$, is far from the required team size, $\tau$. The relationship between $\tau$, $\theta$ and $x$ in Eq \eqref{eq:sig} imparts a continuous response threshold strategy in agents where $x$, the current team size at the target location, is the input stimulus and $\tau$ is the internal threshold for collaboration. When $x$ is $\geq \tau$ the probability to collaborate increases sharply based on the slope of $\Sig$ which, in turn, is controlled by $\theta$.
-
-When the central controller stops receiving perfect information about the system it's behavior quickly becomes non-ideal. For example, if the perception of task magnitude $\tau$ becomes noisy then agents are often assigned non-optimally and resources are wasted. The RT TA strategy can be employed to mitigate this effect. Once again taking the firefighting scenario into account. If a non-ideal team size is assigned to a fire by a central controller due to imperfect estimation of fire size, then it should still be viable to hold off from starting the containment process until a more reasonable number of agents arrives at the fire. This is important as agents have only a finite amount of resources to complete their assigned tasks. In the case of firefighting, this resource may be the amount of fire repellent being carried on energy stores of the robot.
-
-The experiments outlined here study the effect of applying RT TA in a group after it has been assigned to a task using the centralized control strategy outlined earlier. We compare this to a case where the agents assigned to tasks directly begin the collaborative process without individual sensing and, consequently, applying the RT strategy. 
+The experiments outlined here study the effect of applying RT TA in a group after it has been assigned to a task using the centralized control strategy outlined earlier. We compare this to a case where the agents assigned to tasks directly begin the collaborative process without individual sensing and without applying the RT strategy. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
+Designing experimentally verifiable and reproducible metrics for comparing pure distributed TA with an optimal centralized controller is challenging. This is because optimal centralized control really performs two functions, it assigns particular agents to particular targets and in doing so it also optimizes the utility for the entire swarm system. Distributed task allocation, on the other hand, assumes that agents are already at task sites and answers the question of whether or not an individual should perform a task based so as to also optimize macro-level utility and minimize wastage of resources.
 
+\begin{figure}[!ht]
+\centering\includegraphics[width=.65\textwidth]{../assets/dsim.png}
+\centering\caption{Simulated experiment setup. The colored circles are task locations with different magnitudes. All robots are assigned to tasks based on centralized on distributed control strategies, depending on the experiment being run.}
+\end{figure}
+
+The experiment described herein attempts to enforce a fair comparison between both approaches. Reusing to the firefighting scenario, the field is set up with five ``fires'' or target sites, as seen in Fig.~\ref{fig:expsetup}. Each target has a varying magnitude-$\tau_t$, indicating the number of agents required to successfully complete it. The magnitudes are chosen such that $\sum_{t \in [1,\ldots,5]}\tau_t = N$ where $N$ is the total number of agents. For this experiment $N$ was set constant to $20$ and because of this condition uniformity in randomness for picking $\tau_t$ between $[2, 20]$ is not guaranteed. Having the exact number of agents required to successfully complete all tasks provides a normalized starting condition for comparing all the controllers. This setup can be thought of as a ``snapshot'' of a realistic situation where targets' magnitudes change with time and task allocation needs to be redone at regular time intervals. The temporal aspect of real-world situations is not considered in these experiments as it strays for the objective of comparing the effectiveness of central vs. distributed controllers under the same conditions.
+
+Three different controllers are considered. The first controller is a centralized ILP solver that is assumed to have perfect knowledge of the system, i.e. it knows exactly where agent and fires are located in the experimental arena and also has perfect knowledge of every task's magnitude. This controller is used as a baseline optimum to compare the other controllers to. We can reasonably expect any TA strategy to do no better than this optimal controller. The next controller is also a centralized ILP solver with perfect information about agent and target locations but measures task magnitude with Gaussian noise $\mathcal{N}(0, \sigma)$ added. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 We see two interesting results of applying the RT strategy to agents after they have been assigned tasks. First off, the number of attempted tasks is reduced when compared to both centralized (ideal and noisy) cases. 
 
-\begin{figure}
+\begin{figure}[!ht]
 	\centering\includegraphics[width=\textwidth]{../assets/staticExpResults.png}
-	\centering\caption{Simulation experiment results comparing the number of targets attempted and agents assigned versus failed attempts and assignments for centralized control in the ideal and noisy case as well as the hybrid centralized-RT model.}
+	\centering\caption{Simulation experiment results for three types of control --- central ideal, central noisy, and hybrid noisy. Yellow bars in the top row show avg. number of attempted tasks with std. deviation error bars. Blue bars show the avg. number of attempted tasks that failed. Bottom row show similar results from an agent-centric viewpoint, i.e. assigned vs. failed agent averages. 100 experiment runs per controller for each bar.}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
