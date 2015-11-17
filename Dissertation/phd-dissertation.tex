@@ -480,7 +480,7 @@ Clearly this situation --- like most real world situations --- is dynamic, i.e.,
 
 Nevertheless, maximizing snapshots of a MATA system with perfect information throughout the course of a prescribed scenario provides a means for defining baseline system-wide optimality. At any given point in time, the optimal solution of a snapshot of the state of the system is the best assignment of targets that agents can be given.
 
-\textcolor{red}{I fully expect the reader to still have a number of questions about the notion of optimality here and perhaps the fact that a formal definition of optimal TA is still missing is a deal-breaker for this section but nevertheless, the discussion above is important to convey the context of this problem.} 
+\textcolor{red}{Finish this discussion.} 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment}\label{ch:existeqrtm}
@@ -898,7 +898,7 @@ For such a centralized approach to be viable, attention must once again be drawn
 
 Using the problem formulation from Chapter~\ref{ch:model} we can pose the TA optimization problem as a 0-1 ILP. This means that finding an optimal assignment of agents to targets (taking constraints into account) can be achieved by using any of the many existing methods for solving ILPs. This also means that the TA optimization problem exists in the realm of NP-hard problems and no polynomial time algorithm currently exists for finding such an optimal assignment. Although, efficient methods do exist for finding near optimal solutions. Also, given a constrained domain such as a set number of agents and relatively few targets most existing computers can find TA solutions well within the physical movement time-frame of robots. 
 
-The major caveat for using a centralized algorithm is that the controller is assumed to have perfect knowledge of the operational environment and model parameters for the tasks being accomplished. Since this information is almost always subject to the accuracy constraints of the sensors making on-field measurements a centralized method is not always feasible. Nonetheless, we study the effects of using a centralized controller assuming perfect system information as a baseline --- being the best possible performance a multi-agent system can achieve for TA.
+The caveat for using a centralized algorithm is that the controller is assumed to have perfect knowledge of the operational environment and model parameters for the tasks being accomplished. Since this information is almost always subject to the accuracy constraints of the sensors making on-field measurements a centralized method is not always feasible. Nonetheless, we study the effects of using a centralized controller assuming perfect system information as a baseline --- being the best possible performance a multi-agent system can achieve for TA.
 
 Fig.~\ref{fig:centralcontrol} describes how the centralized controller works and communicates with each agent's on-board controller. Target and agent information is fed to the controller to set up the ILP. The values of importance here are task magnitudes $\tau_j$, target specific welfare $W(t_j) = w_j$ if $|a_j| \geq k_j$ and $0$ otherwise, and target thresholds $K(t_j)$ or $k_j$. We set,
 \begin{equation*}
@@ -945,24 +945,30 @@ Three different controllers are considered. The first controller is a centralize
 One hundred experiment sets were run on each controller. Each experiment had different initial conditions but the conditions were consistent between all three controllers. The results presented in Fig.~\ref{fig:controlexpresults} compare the average number of tasks attempted per run to avg. failed task assignments per run for each controller. A task was considered assigned if at least one agent was assigned to it. A task was considered failed if at least one agent was assigned to it but fewer than $k_j$ --- the true target threshold --- and the agents attempted that task. For the central controllers cases assigned agents automatically attempted the task whereas for the distributed case, agents first ran the RT algorithm to decide whether or not to attempt a task that they were assigned to. This way of representing the data allows us to easily compare the rates of resources wasted per experiment and per agent as well as the average number of tasks successfully assigned by a controller and attempted by agents.
 
 \begin{figure}[!ht]
-	\centering\includegraphics[width=\textwidth]{../assets/staticExpResults.png}
+	\centering\includegraphics[width=\textwidth]{../assets/staticExpResultsWithTables.png}
 	\centering\caption{Simulation experiment results for three types of control --- central ideal, central noisy, and hybrid noisy. Yellow bars in the top row show avg. number of attempted tasks with std. deviation error bars. Blue bars show the avg. number of attempted tasks that failed. Bottom row show similar results from an agent-centric viewpoint, i.e. assigned vs. failed agent averages. 100 experiment runs per controller for each bar.}\label{fig:controlexpresults}
 \end{figure}
 
-We see some interesting behavior when applying the RT strategy to agents after they have been assigned tasks. First off, the central controller with perfect (ideal) system information has an avg. assignment rate of \textit{nearly} $100\%$ for agents and targets. It is interesting to note that this value sometimes dropped below $100\%$ because in some rare cases, the optimal ILP solution involved not assigning any agents to a target even though agents were available. 
+We see some interesting behavior when applying the RT strategy to agents after they have been assigned tasks. First off, the central controller with perfect (ideal) system information has an avg. assignment rate of \textit{nearly} $100\%$ for agents and targets. It is interesting to note that this value sometimes dropped below $100\%$ because in some rare cases, the optimal ILP solution involved not assigning any agents to a target even though agents were available. The observation that the ideal solver's failed assignments is not exactly $0$ is perplexing and warrants further study.
+
+Looking at the central noisy controller, the percentage of failed tasks was right around $35\%$ in all cases from low noise addition, $\sigma = 1$ to more noisy values when $\sigma = 5$. Although, the percentage of agents failed did lower from about $35\%$ when $\sigma = 1$ to about $19\%$ when $\sigma = 5$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
 This is due to the fact that spatiality was considered by the solver and so it was sometimes infeasible to move agents to their closest targets since they may have better served larger targets that were farther away. Therefore, in some rare cases targets may have been left completely unassigned. The number of attempted tasks is reduced when compared to both centralized (ideal and noisy) cases.
 
+\textcolor{red}{complete\ldots}
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
-
+\textcolor{red}{complete\ldots}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%   The Bibliography, if any   %%%%%%%%%
 \bibliographystyle{ieeetr}		% or "plain", "siam", or "alpha", etc.
-%\nocite{*}						% list all refs in database, cited or not
+\nocite{*}						% list all refs in database, cited or not
 \bibliography{../refworks}
 \end{document}
 
