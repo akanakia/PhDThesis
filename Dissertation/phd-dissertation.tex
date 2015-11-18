@@ -47,6 +47,7 @@
 \usetikzlibrary{shapes,arrows,calc,fit,positioning,shapes.symbols,shapes.callouts,patterns,automata,matrix}
 
 % To keep footnotes on the same page are reference
+\usepackage{lipsum}
 \interfootnotelinepenalty=10000
 \raggedbottom
 
@@ -58,6 +59,13 @@
 {
 \refstepcounter{comcount}
 \smallskip\noindent\fbox{\parbox{\linewidth}{\emph{Comment \arabic{comcount}} : \small{#1}}} 
+}
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
 }
 
 % - Math
@@ -407,15 +415,13 @@ The different methods discussed in this section are widely used for modeling and
 	\item PFSM models and rate equations allow us to study the dynamics of the system which provides insight on macro-level aspects such as steady state analysis, parameter identification, equilibria, etc.
 	\item Physics based simulations allow us to quickly verify our algorithms and provide a rapid prototyping tool for iterative refinement of swarm algorithms without having to invest in costly hardware.
 \end{enumerate}
-
-The following sections use at least a few of these methodologies to define and analyze new task-assignment strategies for multi-agent systems. In Chapter~\ref{ch:optimization} I use all of these methods and results from the following two chapters to propose a generalized framework for optimal control of a robot swarm.
-
+The following chapter use these methodologies to define and analyze new task-assignment strategies for multi-agent systems.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Designing an Optimal Control Model for Multi-Agent Systems}\label{ch:model}
 TA is a canonical problem in swarm robotics. With the advent of more sophisticated general purpose robots such as the Baxter, NAO and innumerable UAVs the problem of handling real world tasks collaboratively, be it with other robots or humans, is becoming increasingly important. Many group tasks exhibit a property of concurrent benefit, i.e. single agent attempts to complete the task are guaranteed to fail or waste resources but groups attempting the task together provide a considerable concurrency benefit. A problem oft ignored by MATA model developers is deciding when a group is capable enough to attempt the collaborative task and whether or not simultaneous actions are important to complete the task successfully. While this precise temporal component of attempting tasks concurrently is not the focus of our work, it is important to point out as we make certain assumptions on required task group sizes and how these requirements change with time. In this context TA is distilled down to the process of assigning the required number of agents to particular dynamic tasks without worrying about how agents get to the tasks or what the exact dynamics of agents and these genericized tasks are. 
 
-We assume that tasks or targets (used synonymously throughout this paper) require at least two agents to attempt collaboratively. The major caveat here is that the \emph{exact} number of agents required to attempt a task is unknown and very difficult to accurately discern. Tasks with concurrent benefit share the property that the probability of success depends non-linearly on the collective capabilities and team size of the robots attempting it. In addition, the exact number of agents required to successfully complete the task varies over time due to numerous  complex physical parameters. Many collaborative tasks---particularly those seen in biological systems---exhibit the property of concurrent benefit, ranging from surveillance and coordinated defense of enclosed areas like termite mounds and honey bee hives \cite{breed1990division} to collective transport of heavy objects and even containment of oil spills and forest fires. To contain a large fire, it is insufficient (and inefficient) for a single agent to start putting out the fire without waiting for backup. But the rate of fire containment increases quickly by adding just a few more agents to the group, which illustrates the property of concurrent benefit well.
+We assume that tasks or targets (used synonymously throughout this paper) require at least two agents to attempt collaboratively. The major caveat here is that the \emph{exact} number of agents required to attempt a task is unknown and very difficult to accurately discern. Tasks with concurrent benefit share the property that the probability of success depends non-linearly on the collective capabilities and team size of the robots attempting it. In addition, the exact number of agents required to successfully complete the task varies over time due to numerous  complex physical parameters. Many collaborative tasks---particularly those seen in biological systems---exhibit the property of concurrent benefit, ranging from surveillance and coordinated defense of enclosed areas like termite mounds and honey bee hives \cite{Breed1990} to collective transport of heavy objects and even containment of oil spills and forest fires. To contain a large fire, it is insufficient (and inefficient) for a single agent to start putting out the fire without waiting for backup. But the rate of fire containment increases quickly by adding just a few more agents to the group, which illustrates the property of concurrent benefit well.
 
 \section{Multi-Agent Task Allocation Model}
 With this general overview of MATA in mind, we present the following formal model for TA.
@@ -453,12 +459,16 @@ With this general overview of MATA in mind, we present the following formal mode
 where $w_j$ can be a value or function defining the utility of completing task-$t_j$ upon successful assignment.
 
 	\item Global welfare function,
-\begin{align}\label{eq:gwf}
-	\We = \sum\limits_{j = 1}^{|\Ta|} W(t_j, |a_j|)
+\begin{align}\label{eq:ilp}
+	\text{Maximize}\hspace{1cm} & \We = \sum\limits_{t \in \Ta} W(t, |A(t)|)\\
+	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
+	& \sum\limits_{t \in \Ta} x(n_i, t) \leq 1\notag\\
+	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
+	& 0 \leq x(n_i, t_j) \leq 1\notag	
 \end{align}
 \end{itemize}
 
-Eqn.~\eqref{eq:gwf} is an objective function that can be maximized to provide an \emph{optimal} assignment of agents to targets. This is in contrast to a lot of existing approaches for MATA where each agent is concerned with maximizing their own utility, making such approaches agent-centric. We, instead, focus on the task as the primary entity for which a utility function is defined and maximized. This approach falls more in line with work such as \cite{shehory1998methods}.
+Eq.~\eqref{eq:ilp} is an objective function that can be maximized to provide an \emph{optimal} assignment of agents to targets. This is in contrast to a lot of existing approaches for MATA where each agent is concerned with maximizing their own utility, making such approaches agent-centric. We, instead, focus on the task as the primary entity for which a utility function is defined and maximized. This approach falls more in line with work such as \cite{shehory1998methods}.
 
 The following example describes a cooperative game with target thresholds and player constraints as seen in Figure \ref{fig:ex1}.
 \begin{itemize}
@@ -475,20 +485,18 @@ The following example describes a cooperative game with target thresholds and pl
 \end{figure}
 
 \section{Defining Optimality for Multi-Agent Task Allocation}\label{sec:optimaldef}
-Consider a simplified forest firefighting scenario where a number of isolated fires and flame fronts exist in a specified geographic region. Our goal is to contain all of the fires and prevent them from spreading or, at the very least, contain as many as we can given our manpower. If the fires did not evolve over time and we had perfect information about the threshold value of each target/fire then a central controller would only have to maximize Eqn.~\eqref{eq:gwf} subject to the constraints mentioned in Table~\ref{tab:constraints} and provide the resulting assignment matrix to all the agents. The agents would then move to their assigned fires. Since Eqn.~\eqref{eq:gwf} guarantees successful assignments (if such an assignment is possible) there would be enough robots at each fire to put it out and all the tasks would be complete. 
+Consider a simplified forest firefighting scenario where a number of isolated fires and flame fronts exist in a specified geographic region. Our goal is to contain all of the fires and prevent them from spreading or, at the very least, contain as many as we can given our manpower. If the fires did not evolve over time and we had perfect information about the threshold value of each target/fire then a central controller would only have to maximize Eq.~\eqref{eq:ilp} and provide the resulting assignment matrix to all the agents. The agents would then move to their assigned fires. Since Eq.~\eqref{eq:ilp} guarantees successful assignments (if such an assignment is possible) there would be enough robots at each fire to put it out and all the tasks would be complete. 
 
-Clearly this situation --- like most real world situations --- is dynamic, i.e., the size and number of fires changes over time. The task allocation model described in the previous section has no notion of time. We consider constant but repeated optimization of ``snapshots'' of a dynamic problem so that at any given point a solution to the TA problem is valid. The main assumption made here is that maximizing Eqn.~\eqref{eq:gwf} subject to the constraints listed in Table~\ref{tab:constaints} takes considerably less time than the physical evolution of the task magnitudes, and in-turn, the task thresholds. If this is not the case or if, for any other reason, the state of the system is not updated in a central controller then this notion of optimality quickly fails.
+Clearly this situation --- like most real world situations --- is dynamic, i.e., the size and number of fires changes over time. The task allocation model described in the previous section has no notion of time. We consider constant but repeated optimization of \textit{snapshots} of a dynamic problem so that at any given point a solution to the TA problem is valid. The main assumption made here is that maximizing Eq.~\eqref{eq:ilp} subject to the constraints listed in Table~\ref{tab:constaints} takes considerably less time than the physical evolution of the task magnitudes, and in-turn, the task thresholds. If this is not the case or if, for any other reason, the state of the system is not updated in a central controller then this notion of optimality quickly fails.
 
 Nevertheless, maximizing snapshots of a MATA system with perfect information throughout the course of a prescribed scenario provides a means for defining baseline system-wide optimality. At any given point in time, the optimal solution of a snapshot of the state of the system is the best assignment of targets that agents can be given.
 
-\textcolor{red}{Finish this discussion.} 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment}\label{ch:existeqrtm}
-A number of different methods exist for TA in MAS such as deterministic leader-follower coalition algorithms \cite{Chen2011} and more complex market-based approaches \cite{Amstutz2008} to simpler probabilistic algorithms for individually simplistic agents \cite{Dantu2012}. As mentioned earlier, the reason that I focus so heavily on the RT model is it's widespread use in ethology research for modeling social insects. While this phenomenological evidence provides a solid incentive for their use in engineered robotic systems, there has so far been no mathematical argument for their use. In this chapter I provide---for what I believe to be the first time in the field of swarm robotics---a mathematical explanation for their prevalence using a well known result from game theory\footnote{I would like to thank Dr. Behrouz Touri for his extensive help on the theory of global games and in formulating and proving the theorems mentioned in this chapter.}. The problem of TA in MAS is formulated as a global game and two theorems are subsequently proved showing the existence of a Bayes Nash Equilibrium in a system using DRTs (Theorem 1) and, subsequently, CRTs (Theorem 2) for TA in MAS. Theorem 2 also analytically shows how Gaussian noise in perceiving stimulus signals leads to sigmoid RTs, as are commonly observed in nature.
+\chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment$^*$}\blfootnote{$^*$ I would like to thank Dr. Behrouz Touri for his extensive help on the theory of global games and in formulating and proving the theorems mentioned in this chapter. The use of the article ``we'' in this chapter serves to remind the reader of the extent our my collaboration with Dr. Touri.}\label{ch:existeqrtm}
+A number of different methods exist for TA in MAS such as deterministic leader-follower coalition algorithms \cite{Chen2011} and more complex market-based approaches \cite{Amstutz2008} to simpler probabilistic algorithms for individually simplistic agents \cite{Dantu2012}. As mentioned earlier, the reason that we focus so heavily on the RT model is it's widespread use in ethology research for modeling social insects. While this phenomenological evidence provides a solid incentive for their use in engineered robotic systems, there has so far been no mathematical argument for their use. In this chapter we provide --- for what we believe to be the first time in the field of swarm robotics --- a mathematical explanation for their prevalence using a well known result from game theory. The problem of TA in MAS is formulated as a global game and two theorems are subsequently proved showing the existence of a Bayes Nash Equilibrium in a system using DRTs (Theorem 1) and, subsequently, CRTs (Theorem 2) for TA in MAS. Theorem 2 also analytically shows how Gaussian noise in perceiving stimulus signals leads to sigmoid RTs, as are commonly observed in nature.
 
 \section{Global Games: A Brief Overview}\label{sec:ggoverview}
-Game theory is the study of strategic interactions among multiple agents or players, such as robots, people, firms, etc.\~where the decision of each party affects the payoff of the rest. A fundamentally important class of games is one with incomplete or imperfect information where each agent's utility depend not only on the actions of the other agents, but also on an underlying fundamental signal that cannot be accurately ordained by the agents. The class of global games with incomplete information was originally introduced in \cite{Carlsson1993} where two players are playing a game and the utility of the two players depends on an underlying fundamental signal $\tau \in \mathbb{R}$, but each agent observes a noisy variation of this signal, $x_i$. Returning to my previous example of firefighting (as seen in Figure~\ref{fig:ggsetup}), this fundamental signal $\tau$ is the \emph{magnitude} of the task of putting out the fire, i.e., the number of robots needed to do so. The size and intensity of the fire, along with environmental and other site-specific factors all play a major role in determining whether an agent should begin the task or wait for more help to arrive.
+Game theory is the study of strategic interactions among multiple agents or players, such as robots, people, firms, etc. where the decision of each party affects the payoff of the rest. A fundamentally important class of games is one with incomplete or imperfect information where each agent's utility depend not only on the actions of the other agents, but also on an underlying fundamental signal that cannot be accurately ordained by the agents. The class of global games with incomplete information was originally introduced in \cite{Carlsson1993} where two players are playing a game and the utility of the two players depends on an underlying fundamental signal $\tau \in \mathbb{R}$, but each agent observes a noisy variation of this signal, $x_i$. Returning to my previous example of firefighting (as seen in Figure~\ref{fig:ggsetup}), this fundamental signal $\tau$ is the \emph{magnitude} of the task of putting out the fire, i.e., the number of robots needed to do so. The size and intensity of the fire, along with environmental and other site-specific factors all play a major role in determining whether an agent should begin the task or wait for more help to arrive.
 
 While I use the term magnitude to describe $\tau$, it is a stand-in for a simplified representation of a more abstract quality of any task. All tasks demand completion and the act of completion requires resources, be it time and/or energy of some form. In swarms of minimalist agents with limited capabilities, the resource required to collaboratively complete a task is invariably quantized into the number of agents attempting to complete that task. In bee hives and ant colonies the drive to complete a task is regulated by pheromone levels, among other signals.  In engineered swarm systems, more direct measurements of the environment through the use of on-board sensors allow a robot to independently estimate $\tau$, however imperfectly. In either case, $\tau$ is an inherent \emph{truth} about the task that can never be discerned accurately, but is always indirectly estimated by all agents. It is important to highlight that agents never share their independent estimates of $\tau$ with each other in my proposed formulation of the TA problem. While this may seem like a weakness in my argument, most of the research on RT TA explicitly mentions limited to no communication requirements to be a major advantage of this approach versus other methods since even limited information propagation through a $>1000$ agent system quickly becomes the bottleneck for any distributed swarm algorithm.
 
@@ -606,7 +614,7 @@ where $\Phi$ is the cumulative distribution function (cdf) of a standard Gaussia
 
 \begin{theorem}\label{thrm:relativefrequency}
 For the relative number of agents $N_{rel}(\hat{\tau})$, we have
-\begin{equation}
+\begin{equation}\label{eq:drtcrt}
 \lim_{n\to\infty}N_{rel}(\hat{\tau})=\Phi(\frac{\hat{\tau}-\td}{\sigma^2})
 \end{equation}
 where $\Phi$ is the cumulative distribution function (cdf) of a standard Gaussian. 
@@ -627,7 +635,7 @@ for all $\hat{\tau}\in\R$ and some optimal value $d\approx 1.704$ as described i
 Therefore, despite agents using deterministic threshold strategies, their \emph{aggregate behavior} would appear to an outside observer as a continuous sigmoid threshold function instead of numerous discrete thresholds.
 \begin{figure}[!ht]
 	\centering\includegraphics[width=0.6\columnwidth]{../assets/thm2fig.png}
-	\centering\caption{Visualization of Theorem~2 as $N_{rel}$ estimates $\Phi(\cdot)$. The plot was generated by running Eqn.~1 10,000 times for each point in $\hat{\tau} = 1$ to $10$ in increments of $0.1$. $n = 10$, $\td = 5$ and $x_i = \hat{\tau} + \eta_i$ ($\eta_i \sim\mathcal{N}(0, \sigma^2)$). Each solid-line in the plot is generated by sweeping $\sigma^2 = \{0.1, 1, 2, 10\}$, with $\sigma^2 = 0.1$ being close to a step-function and $\sigma^2 = 10$ having the \emph{flattest} slope. The shaded region provides a difference comparison between the $N_{rel}$ estimate of $\Phi(\cdot)$ and $\Phi(\cdot)$ itself, which is plotted using dotted-lines.}\label{fig:thm2fig}
+	\centering\caption{Visualization of Theorem~2 as $N_{rel}$ estimates $\Phi(\cdot)$. The plot was generated by running Eq.~\ref{eq:drtcrt} 10,000 times for each point in $\hat{\tau} = 1$ to $10$ in increments of $0.1$. $n = 10$, $\td = 5$ and $x_i = \hat{\tau} + \eta_i$ ($\eta_i \sim\mathcal{N}(0, \sigma^2)$). Each solid-line in the plot is generated by sweeping $\sigma^2 = \{0.1, 1, 2, 10\}$, with $\sigma^2 = 0.1$ being close to a step-function and $\sigma^2 = 10$ having the \emph{flattest} slope. The shaded region provides a difference comparison between the $N_{rel}$ estimate of $\Phi(\cdot)$ and $\Phi(\cdot)$ itself, which is plotted using dotted-lines.}\label{fig:thm2fig}
 \end{figure}
 
 \section{Discussion and Summary}\label{sec:discsum}
@@ -650,17 +658,17 @@ The objective of each agent in the robot swarm is to find a collaboration site i
 
 It is perfectly reasonable to assume that agents arrive at the same collaboration site after having just completed a task there (possibly unsuccessfully) but will now be part of a new collaboration group. Each agent individually decides whether or not to collaborate at a given time step, while waiting at a collaboration site. If the majority of agents at that site decide to collaborate then the entire population is recruited for the task and thus a collective consensus is reached using a majority voting scheme. Here, I consider a majority to mean exactly half or more of a given population. 
 
-\begin{figure*}[!htb]
+\begin{figure}[!htb]
 \centering\begin{subfigure}{.5\textwidth}
 \centering\includegraphics[width=\textwidth]{../assets/sigmoid2.png}
 \caption{Changing $\tau$ offsets the curve along the $x$ axis, allowing to set the desired mean team size.}\label{}
 \end{subfigure}~
 \centering\begin{subfigure}{.5\textwidth}
 \centering\includegraphics[width=\textwidth]{../assets/sigmoid1.png}
-\caption{Changing $\theta$ changes the slope at the point $x^* = \tau$, $\Sig(x^*) = 0.5$, allowing to control the team's variance.}\label{}
+\caption{Changing $\theta$ changes the slope at the point $x^* = \tau$, $\Sig(x^*) = 0.5$, allowing to control the team's variance.}
 \end{subfigure}~
 \caption{Sigmoid CRT function and its parameters.}\label{fig:sig}
-\end{figure*}
+\end{figure}
 
 An individual agent-$i$'s willingness to collaborate is a stochastic term governed by a sigmoid based RT function that takes as input, the number of agents $\xm$ currently at the same collaboration site as agent-$i$ and outputs a probability of collaboration using control parameters $\theta$ and $\tau$:
 \begin{equation}
@@ -668,7 +676,7 @@ An individual agent-$i$'s willingness to collaborate is a stochastic term govern
 \end{equation}
 The parameter $\theta$ controls the slope of the sigmoid function, while $\tau$ controls its offset along the $x$ axis, as seen in Fig.~\ref{fig:sig}. Each agent is independently responsible for estimating the group size $\xm$ at a given time either by direct sensing or by communication. In practice,  this involves building a list of unique identifiers of the agents sharing its collaboration site. The overall algorithm, followed by each individual agent in the system, is provided in Alg.~\ref{alg:sigalg}.
 
-Note that the proposed RT function is different from \cite{Bonabeau1999}, who uses high-order polynomials. While these functions work well in regimes with moderate slope, they create numerical problems when approximating unit-step-like responses such as those (implicitly) used in \cite{Lerman2001}. I particularly chose the Logistic function from the large class of sigmoid functions due to the intuitive nature of the parameters $\tau$ and $\theta$. 
+Note that the proposed RT function is different from \cite{Bonabeau1999}, who uses high-order polynomials. While these functions work well in regimes with moderate slope, they create numerical problems when approximating unit-step-like responses such as those (implicitly) used in \cite{Lerman2001}. I particularly chose the logistic function from the large class of sigmoid functions due to the intuitive nature of the parameters $\tau$ and $\theta$. 
 
 \begin{algorithm}
 \caption{TA algorithm for an individual agent using the sigmoid threshold function}
@@ -809,10 +817,7 @@ For both experiments a single collaboration site is used and each run simulates 
 \caption{Comparison of the collaboration rate for TA with probabilistic and deterministic \cite{Lerman2001} for different values of $\theta$ and team sizes $\tau$ in an environment with one collaboration site and one hundred robots. }\label{fig:lercol}
 \end{figure*}
 
-I will first compare the dynamics of the proposed approach with Lerman et al.'s k-collaboration model \cite{Lerman2001} and then validate the emergence of group sizes with similar means but varying variances.
-
-Figure \ref{fig:lercol3} shows collaboration rates for both models when $\theta$ is set to 2 (for the probabilistic model) and the wait time is set to $\infty$ (for the deterministic model), in order to allow for a fair comparison. (All experiments are run in a regime where infinite wait times are optimal wait times, i.e., there are more agents than collaboration sites.) Figures \ref{fig:lercol3}, \ref{fig:lercol2} and \ref{fig:lercol1} show collaboration rates for $\theta = 2$, $\theta = 1$ and $\theta=0$ with infinite wait time. With $\theta=0$, the Logistic function is uniformly 0.5, allowing any team size to form.  
-With increasing $\theta$ the Logistic function approximates a unit step, minimizing the variance. 
+I will first compare the dynamics of the proposed approach with Lerman et al.'s k-collaboration model \cite{Lerman2001} and then validate the emergence of group sizes with similar means but varying variances. Figure \ref{fig:lercol3} shows collaboration rates for both models when $\theta$ is set to 2 (for the probabilistic model) and the wait time is set to $\infty$ (for the deterministic model), in order to allow for a fair comparison. (All experiments are run in a regime where infinite wait times are optimal wait times, i.e., there are more agents than collaboration sites.) Figures \ref{fig:lercol3}, \ref{fig:lercol2} and \ref{fig:lercol1} show collaboration rates for $\theta = 2$, $\theta = 1$ and $\theta=0$ with infinite wait time. With $\theta=0$, the logistic function is uniformly 0.5, allowing any team size to form.  With increasing $\theta$ the logistic function approximates a unit step, minimizing the variance. 
 
 \begin{figure*}[!htb]
 \begin{subfigure}{0.5\textwidth}
@@ -855,7 +860,13 @@ approximates the Normal distribution \eqref{eq:normalcdf}.
 
 Figure \ref{fig:vars} shows how the variance of group size decreases with increasing $\theta$. This is because the sigmoid function approximates the unit step, making the team size more and more deterministic. On the other hand, low values of $\theta$ lead to large variances in the group size. For $\theta=0$, the variance is constant for all values of $\tau$ and depends exclusively on the total number of robots. 
 
-Finally, I use the Droplet swarm robot platform to perform real experiments to study the effects of using the proposed TA scheme on a physical system. The Droplets are small individually simple robots capable of omni-directional motion and communication (via IR) as well as sensing patterns projected from above. In my experiment I assume that all agents have already arrived at a collaboration site and measure the corresponding collaboration rates for a team of 6 robots while varying values of $\tau$ and $\theta$. Each agent is individually running the algorithm described in Alg.\ref{alg:sigalg}. A collaboration event is recognized by having all the robots turn on their green LEDs for 5 seconds. After such a collaboration event, each agent resets its group size estimate and runs Alg.\ref{alg:sigalg} again. 
+\begin{figure}[!ht]
+\centering\includegraphics[width=.49\textwidth]{../assets/DARSexp.jpg}
+\centering\includegraphics[width=.49\textwidth]{../assets/droplettop.jpg}
+\centering\caption{(Left) The Droplets platform set up for the response threshold model experiment to measure group sizes by sweeping $\tau$ and $\theta$. (Right) A single droplet robot without it's top cover showing omnidirectional IR sensors for communication.}\label{fig:DARSdropexp}
+\end{figure}
+
+Finally, I use the Droplet swarm robot platform to perform real experiments to study the effects of using the proposed TA scheme on a physical system. The Droplets are small individually simple robots capable of omni-directional motion and communication (via IR) as well as sensing patterns projected from above as seen in Fig.~\ref{fig:DARSdropexp}. In my experiment I assume that all agents have already arrived at a collaboration site and measure the corresponding collaboration rates for a team of 6 robots while varying values of $\tau$ and $\theta$. Each agent is individually running the algorithm described in Alg.\ref{alg:sigalg}. A collaboration event is recognized by having all the robots turn on their green LEDs for 5 seconds. After such a collaboration event, each agent resets its group size estimate and runs Alg.\ref{alg:sigalg} again. 
 
 \begin{figure}[!htb]
 \centering\includegraphics[width=0.55\textwidth]{../assets/realsimexpnew.png}
@@ -907,8 +918,8 @@ Fig.~\ref{fig:centralcontrol} describes how the centralized controller works and
 \end{equation*}
 where $dist(n,t_j)$ is the normalized straight-line distance between agent $n$ ($\in a_j$) and target $t_j$. To recall, $a_j$ is the set of all agents assigned to target $t_j$ by an assignment. Taking distance into account mimics agent resources in a way, as the controller now exhibits spatial awareness of the system and can account for it when prescribing allocations. Target thresholds are assumed to be equal to task magnitudes for the purposes of this experiment, i.e., $\tau_j = k_j$, $\forall t_j \in \Ta$. 
 
-The ILP constraints and objective to maximize are:
-\begin{align}\label{eq:ilp}
+Recalling the ILP constraints and objective to maximize are:
+\begin{align}
 	\text{Maximize}\hspace{1cm} & \sum\limits_{t \in \Ta} W(t, |A(t)|) = \We\\
 	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
 	& \sum\limits_{t \in \Ta} x(n_i, t) \leq 1\notag\\
@@ -939,37 +950,42 @@ Designing experimentally verifiable and reproducible metrics for comparing pure 
 
 The experiment described herein attempts to enforce a fair comparison between both approaches. Reusing to the firefighting scenario, the field is set up with five ``fires'' or target sites, as seen in Fig.~\ref{fig:expsetup}. Each target has a varying magnitude-$\tau_t$, indicating the number of agents required to successfully complete it. The magnitudes are chosen such that $\sum_{t \in [1,\ldots,5]}\tau_t = N$ where $N$ is the total number of agents. For this experiment $N$ was set constant to $20$ and because of this condition uniformity in randomness for picking $\tau_t$ between $[2, 20]$ is not guaranteed. Having the exact number of agents required to successfully complete all tasks provides a normalized starting condition for comparing all the controllers. This setup can be thought of as a ``snapshot'' of a realistic situation where targets' magnitudes change with time and task allocation needs to be redone at regular time intervals. The temporal aspect of real-world situations is not considered in these experiments as it strays for the objective of comparing the effectiveness of central vs. distributed controllers under the same conditions.
 
-Three different controllers are considered. The first controller is a centralized ILP solver that is assumed to have perfect knowledge of the system, i.e. it knows exactly where agent and fires are located in the experimental arena and also has perfect knowledge of every task's magnitude. This controller is used as a baseline optimum to compare the other controllers to. We can reasonably expect any TA strategy to do no better than this optimal controller. The next controller is also a centralized ILP solver with perfect information about agent and target locations but measures task magnitude with Gaussian noise $\mathcal{N}(0, \sigma)$ added. $\sigma$ is set to $1, 2, and 5$ for three distinct sets of experiments to observe the difference in performance between the central vs. hybrid controllers. At the start of each experiment all $20$ agents and $5$ targets are assigned uniformly random locations. Each controller is run on the same initial conditions.\footnote{The code used to run these simulation experiments is available at: \texttt{www.github.com/akanakia/collab-optimizer}. The optimizer used is called \emph{z3}. It is an open source (MIT license) SMT solver developed at Microsoft Research (\texttt{https://github.com/Z3Prover/z3}).}
+Three different controllers are considered. The first controller is a centralized ILP solver that is assumed to have perfect knowledge of the system, i.e. it knows exactly where agent and fires are located in the experimental arena and also has perfect knowledge of every task's magnitude. This controller is used as a baseline optimum to compare the other controllers to. We can reasonably expect any TA strategy to do no better than this optimal controller. The next controller is also a centralized ILP solver with perfect information about agent and target locations but measures task magnitude with Gaussian noise $\mathcal{N}(0, \sigma)$ added. $\sigma$ is set to $1, 2, and 5$, dubbed low, medium, and high noise, respectively, for three distinct sets of experiments to observe the difference in performance between the central vs. hybrid controllers. At the start of each experiment all $20$ agents and $5$ targets are assigned uniformly random locations. Each controller is run on the same initial conditions.\footnote{The code used to run these simulation experiments is available at: \texttt{www.github.com/akanakia/collab-optimizer}. The optimizer used is called \emph{z3}. It is an open source (MIT license) SMT solver developed at Microsoft Research (\texttt{https://github.com/Z3Prover/z3}).} Finally, a hybrid controller is considered such that the actual agent assignments still come from the noisy central controller but once agents are at a particular they run their own RT algorithm to decide whether or not to attempt the task. The expected advantage here is that clearly bad assignments may be mitigated. Agents' on-board sensors are also assumed to be noisy with Gaussian noise $\mathcal{N}(0, 1)$ added to their independent estimates of the task magnitude (and consequently desired team size), $\tau_t$. We set the slope parameter $\theta$ of the logistic function used by all agents to $1$ for the sake of simplicity in analyzing the results for these experiments. Tuning $\theta$ based on calibrated sensor and communication error is a very interesting avenue to explore for future work in improving RT based TA but is not shown here. The results of running this series of experiments on all three controllers are presented below.
+
+All experiments were carried out on a 64-bit PC running on an 8-core AMD processor with 16GB of high-speed DDR3 memory. The ILP solver used was compiled on 32-bit architecture and implemented via a 32-bit python (2.7) API so the memory restriction per process were fixed at 4GB. Interestingly, 4GB of memory was often not enough for the ILP solver to find a solution to the optimization problem from Eq.~\ref{eq:ilp} even for only 20 agents and 5 targets. Simulations runs had to sometimes be restarted and a single successful run would often take 1--5 minutes even on a high-end machine. While optimizations to the code may have alleviated some of these problems it was interesting to observe a high-end machine having difficulty with the relatively small system being studied here. A centralized controller for a realistic scenario involving hundreds or even thousands of agents and tens or hundreds of tasks would likely required considerable computing resources to solve in a timely manner.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 One hundred experiment sets were run on each controller. Each experiment had different initial conditions but the conditions were consistent between all three controllers. The results presented in Fig.~\ref{fig:controlexpresults} compare the average number of tasks attempted per run to avg. failed task assignments per run for each controller. A task was considered assigned if at least one agent was assigned to it. A task was considered failed if at least one agent was assigned to it but fewer than $k_j$ --- the true target threshold --- and the agents attempted that task. For the central controllers cases assigned agents automatically attempted the task whereas for the distributed case, agents first ran the RT algorithm to decide whether or not to attempt a task that they were assigned to. This way of representing the data allows us to easily compare the rates of resources wasted per experiment and per agent as well as the average number of tasks successfully assigned by a controller and attempted by agents.
 
-\begin{figure}[!ht]
+\begin{figure}[!ht]\label{fig:controlexpresults}
 	\centering\includegraphics[width=\textwidth]{../assets/staticExpResultsWithTables.png}
-	\centering\caption{Simulation experiment results for three types of control --- central ideal, central noisy, and hybrid noisy. Yellow bars in the top row show avg. number of attempted tasks with std. deviation error bars. Blue bars show the avg. number of attempted tasks that failed. Bottom row show similar results from an agent-centric viewpoint, i.e. assigned vs. failed agent averages. 100 experiment runs per controller for each bar.}\label{fig:controlexpresults}
+	\centering\caption{Simulation experiment results for three types of control --- central ideal, central noisy, and hybrid noisy. Yellow bars in the top row show avg. number of attempted tasks with std. deviation error bars. Blue bars show the avg. number of attempted tasks that failed. Bottom row show similar results from an agent-centric viewpoint, i.e. assigned vs. failed agent averages. 100 experiment runs per controller for each bar.}
 \end{figure}
 
-We see some interesting behavior when applying the RT strategy to agents after they have been assigned tasks. First off, the central controller with perfect (ideal) system information has an avg. assignment rate of \textit{nearly} $100\%$ for agents and targets. It is interesting to note that this value sometimes dropped below $100\%$ because in some rare cases, the optimal ILP solution involved not assigning any agents to a target even though agents were available. The observation that the ideal solver's failed assignments is not exactly $0$ is perplexing and warrants further study.
+We see some interesting behavior when applying the RT strategy to agents after they have been assigned tasks. First off, the central controller with perfect (ideal) system information has an avg. assignment rate of \textit{nearly} $100\%$ for agents and targets. It is interesting to note that this value sometimes dropped below $100\%$ because in some rare cases, the optimal ILP solution involved not assigning any agents to a target even though agents were available. There were also some cases where the ILP solver terminated before any solutions could be found.
 
-Looking at the central noisy controller, the percentage of failed tasks was right around $35\%$ in all cases from low noise addition, $\sigma = 1$ to more noisy values when $\sigma = 5$. Although, the percentage of agents failed did lower from about $35\%$ when $\sigma = 1$ to about $19\%$ when $\sigma = 5$.
+Looking at the central noisy controller, the percentage of failed tasks was right around $35\%$ in all cases from low noise addition, $\sigma = 1$ to more noisy values when $\sigma = 5$. Although, the percentage of agents failed did lower from about $35\%$ when $\sigma = 1$ to about $19\%$ when $\sigma = 5$. With the notable exception of total tasks attempted in a high noise environment, the noisy central controller's tasks/agents attempted were comparable to the central controller in all cases. This resulted in a high attempt rate but high failure mode for the centralized noisy controller.
+
+One the other hand, the distributed controller fared much better in the number of failed task attempts, never attaining failure rate higher than $16\%$ for tasks or agents. This lower failure rate did come at the cost of lower total task attempts but the ratio of attempted to failed tasks or agents was consistently higher for the distributed controller than the noisy centralized controller, under the same assignment conditions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
-This is due to the fact that spatiality was considered by the solver and so it was sometimes infeasible to move agents to their closest targets since they may have better served larger targets that were farther away. Therefore, in some rare cases targets may have been left completely unassigned. The number of attempted tasks is reduced when compared to both centralized (ideal and noisy) cases.
+The first result to discuss is the below $100\%$ success rate of the central ideal controller. Two major factors attributed to this result. Firstly, the fact that spatiality was considered by the solver and made it sometimes unfeasible to move agents to their closest targets since they may have better served larger targets that were farther away. Therefore, in some rare cases targets may have been left completely unassigned. Perhaps, more surprising was the fact that some assignments resulted in failed attempts meaning the ideal controller was not able to assign enough agents to a task. The reason for this is that the ILP solver halted at a sub-optimal solution and returned that as a viable solution once the recursion limit was hit while exploring the search space for better solutions. This happened in extremely rare circumstances and may have been avoided by increasing the memory limit of the solver or via other code optimizations.
 
-\textcolor{red}{complete\ldots}
+The centralized noisy controller exhibited relatively high attempt rates for both tasks and agents and was comparable to the ideal case. This comes at the expense of a relatively high failure rate. The consistently high attempt rate may also be a statistical side effect of a relatively low number of agents and, therefore, agent distributions. The additive noise term was applied to each task magnitude value but these values are still floored at two agents since it does not make sense to have collaborative task assignments with fewer than two agents. This means that task magnitude and consequently group sizes are unevenly skewed towards higher values since negative error for small group sizes is capped at two. Nevertheless, these were the same distributions provided in the distributed hybrid controller case and it fared considerably better. Even though fewer tasks were attempted overall by the agents, we can see a noticeable trend towards increased attempt rates and lower failure rates even as overall noise increases in the system. In the case of high central noise, we see an agent attempt rate of around $70\%$ and a failure rate of only $4\%$ making it close to optimal. This, compared to using just the central noisy approach which results in about $90\%$ agent attempt rate but a much higher $19\%$ failure rate. These results show how a hybrid approach relying on some (very) noisy information from a central controller can be substantially improved by applying the RT distributed algorithm for TA.
 
+It is worth reiterating at this point that both, the agents' additive noise term ($\mathcal{N}(0,1)$) as well as the slope of the sigmoid function ($\theta = 1$) were kept consistent throughout the course of this experiment. A very interesting avenue for future research would involve designing an strategy of iterative refinement of $\theta$ to compensate for agent sensor noise. Such a approach is discussed in \cite{Correll2008b}. Simulation experiments such as the ones presented here could form the basis for the iterative refinement model employing real robots and tuning their control parameters in the field. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
-\textcolor{red}{complete\ldots}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%   The Bibliography, if any   %%%%%%%%%
 \bibliographystyle{ieeetr}		% or "plain", "siam", or "alpha", etc.
-\nocite{*}						% list all refs in database, cited or not
+%\nocite{*}						% list all refs in database, cited or not
 \bibliography{../refworks}
 \end{document}
 
