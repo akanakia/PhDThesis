@@ -130,7 +130,7 @@ One of the most elusive but important goals of swarm robotics is to reproduce th
 }
 
 \acknowledgements{	\OnePageChapter	% *MUST* BE ONLY ONE PAGE!
-I am eternally grateful to my colleagues and friends in the robotics lab. Much of my inspiration for this work has come from entertaining and enlightening conversations with my lab buddies, plus countless hours of Halo and Tetris in their company! Of course, none of this work would have been possible without the incredible mentoring of my advisor Dr. Nikolaus Correll as well as my thesis committee. Finally, I would like to confess my eternal gratitude and love for my beautiful wife, Mariah. Even though grad school kept us apart your loving thoughts and enduring patience gave me all the motivation I could have asked for!
+I am eternally grateful to my colleagues and friends in the robotics lab. Much of my inspiration for this work has come from entertaining and enlightening conversations with my lab buddies, plus countless hours of Halo and Tetris in their company! Of course, none of this work would have been possible without the incredible mentoring of my adviser Dr. Nikolaus Correll as well as my thesis committee. Finally, I would like to confess my eternal gratitude and love for my beautiful wife, Mariah. Even though grad school kept us apart your loving thoughts and enduring patience gave me all the motivation I could have asked for!
 }
 
 %\ToCisShort	% use this only for 1-page Table of Contents
@@ -170,8 +170,10 @@ I am eternally grateful to my colleagues and friends in the robotics lab. Much o
 	$n_i$ & Single agent $i$.\\
 	$t_i$ & Single target $i$.\\
 	$\tau$ & Target magnitude. $\tau_i$ is the magnitude of task $i$. This may be a constant or a function.\\
+	$x_i$ & Target magnitude for target $i$ with Gaussian noise added.\\
+	$k_i$ & Target threshold. This is the minimum number of agents required to successfully complete a task. Closely related to task magnitude $\tau_i$. A function can map from one to the other.\\
 	$u_i$ & Agent level utility. This may be a constant or a function.\\
-	$A(t_j)$ or $a_j$ & Set of agents assigned to target $j$.\\
+	$\mathcal{A}(t_j)$ or $\alpha_j$ & Set of agents assigned to target $j$.\\
 	$W(t_j)$ & System welfare for completing a target $j$.\\
 	$\mathcal{N}(\mu, \sigma)$ & Normal or Gaussian distribution with mean $\mu$ and std. deviation $\sigma$.\\
 \end{tabular}
@@ -433,26 +435,26 @@ With this general overview of MATA in mind, we present the following formal mode
 	
 	\item Agent Constraints: $C:\Pl \to \hat{\Ta} \subseteq \Ta$\\
 	The set of constraints for agent-$n_i$ ($= C(n_i)$) is the subset of targets that this agent can reach. It is shortened to $c_i$ for brevity.
-	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of 0-1 elements $x(n_i, t_j)$ or $x_{ij}$ for short, that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
+	\item Agent Assignment Matrix: A $|\Pl| \times |\Ta|$ matrix of 0-1 elements $\xi(n_i, t_j)$ or $\xi_{ij}$ for short, that are either $0$ if agent-$i$ is not assigned to target-$j$ or $1$ if agent-$i$ is assigned to target-$j$.
 	\begin{equation}\label{eq:X}
-		X = \left(\begin{array}{ccc}
-			x_{11} & \ldots & x_{1|\Ta|}\\
+		\chi = \left(\begin{array}{ccc}
+			\xi_{11} & \ldots & \xi_{1|\Ta|}\\
 			\vdots & \ddots & \vdots\\
-			x_{|\Pl|1} & \ldots & x_{|\Pl||\Ta|}
+			\xi_{|\Pl|1} & \ldots & \xi_{|\Pl||\Ta|}
 		\end{array}\right)
 	\end{equation}
-	\item Target Assignments: $A:\Ta \to \hat{\Pl} \subseteq \Pl$\\
-	The set of agents assigned to target-$t_j$ is $= A(t_j)$, which is shortened to $a_j$ for brevity. From~\eqref{eq:X} we can define
+	\item Target Assignments: $\mathcal{A}:\Ta \to \hat{\Pl} \subseteq \Pl$\\
+	The set of agents assigned to target-$t_j$ is $= \mathcal{A}(t_j)$, which is shortened to $\alpha_j$ for brevity. From~\eqref{eq:X} we can define
 \begin{equation}\label{eq:aj}
-	|a_j| = \sum\limits_{i = 1}^{|\Pl|} x_{ij}
+	|\alpha_j| = \sum\limits_{i = 1}^{|\Pl|} \xi_{ij}
 \end{equation}
-	\textbf{Definition:} A target is considered ``successfully assigned'' when $|a_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
-	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|a_j| = k_j$.
+	\textbf{Definition:} A target is considered ``successfully assigned'' when $|\alpha_j| \geq k_j$, i.e. the number of player's assigned to it is greater than or equal to its threshold value.\\
+	\textbf{Definition:} A target is considered ``perfectly assigned'' when $|\alpha_j| = k_j$.
 	\item Target specific welfare function,
 \begin{align}\label{eq:wf}
-	W(t_j, |a_j|) & = \left\{
+	W(t_j, |\alpha_j|) & = \left\{
 	\begin{array}{ll}
-		w_j & |a_j| \geq k_j\\
+		w_j & |\alpha_j| \geq k_j\\
 		0 & o/w
 	\end{array}\right.
 \end{align}
@@ -460,11 +462,11 @@ where $w_j$ can be a value or function defining the utility of completing task-$
 
 	\item Global welfare function,
 \begin{align}\label{eq:ilp}
-	\text{Maximize}\hspace{1cm} & \We = \sum\limits_{t \in \Ta} W(t, |A(t)|)\\
+	\text{Maximize}\hspace{1cm} & \We = \sum\limits_{t \in \Ta} W(t, |\mathcal{A}(t)|)\\
 	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
-	& \sum\limits_{t \in \Ta} x(n_i, t) \leq 1\notag\\
-	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
-	& 0 \leq x(n_i, t_j) \leq 1\notag	
+	& \sum\limits_{t \in \Ta} \xi(n_i, t) \leq 1\notag\\
+	& \sum\limits_{t \in \Ta \backslash C(n_i)} \xi(n_i, t) = 0\notag\\
+	& 0 \leq \xi(n_i, t_j) \leq 1\notag	
 \end{align}
 \end{itemize}
 
@@ -897,6 +899,9 @@ In this chapter I presented a multi-agent collaboration algorithm to recruit an 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Comparing Centralized vs. Hybrid Approaches to Task Allocation}\label{ch:cendistexps}
+%Task allocation (TA) is ubiquitous in different fields of research. It is often called task allocation or task assignment in the field of robotics, specifically, swarm robotics and multi-agent systems (MAS). An equivalent problem is studied by ethologists to model division of labor in social insect colonies. In theoretical computer science there is a generalized formulation of task allocation called the multiple integer knapsack problem. In game theory, this problem is referred to as the vehicle-target assignment problem. Each of these formulations provides a unique perspective for studying the same problem and leveraging these different perspectives is essential for providing a generalized definition for TA. 
+%As pointed out in \cite{gerkey2004formal}, while the research areas of MAS and TA have expanded considerably over the last decade most of the work on multi-agent task allocation (MATA) has focused mainly on very specific proof-of-concept examples of MATA system design. Even ten years later, current TA models are for scenarios such as foraging or surveillance or containment and service a niche in the domain. There is as yet no general model for MATA that can be used to globally define the problem. Gerkey et al.~\cite{gerkey2004formal}, provide an excellent starting point for this. The paper categorizes existing work in the field while also providing a utility based definition for MATA optimality but does not present a generalized MATA model. While Gerkey et al.~\cite{gerkey2004formal} provide a taxonomy of existing MATA architectures, our goal with this paper is to provide a much more general low-level model for MATA and propose a definition of optimality that holds true under most specific TA scenarios. We do not provide a comparison of existing models in the field but instead attempt to situate our proposed general model for MATA as a valid framework that both existing and new  architectures can be molded to fit within. 
+
 Chapter~\ref{ch:model} sets up a formal model for defining task allocation in multi-agent systems. In doing so, it also presents a valid definition of optimal task allocation by formulating the problem as an ILP. The solution to this ILP is a mapping from agents to targets that result in maximized system utility. Therefore, a natural next step would be to design a controller for the system that could communicate with agents and provide them with these optimal assignments.
 
 For such a centralized approach to be viable, attention must once again be drawn to the fact that the definition of optimality assumes perfect information about the state of the system. All object positions as well as target magnitudes $\tau_t$ must be known the to the central controller to construct an accurate objective function and constraints. If a central controller has incomplete or inaccurate information about a system then it is very likely the assignments returned by the ILP could result in significant wastage of resources by agents. In such a situation we see how the RT algorithm comes into play to prevent unnecessary task attempts by a group of agents.  This chapter focuses on comparing such a centralized approach with a hybrid approach which uses the RT strategy from the previous chapter layered upon noisy centralized control.
@@ -920,11 +925,11 @@ where $dist(n,t_j)$ is the normalized straight-line distance between agent $n$ (
 
 Recalling the ILP constraints and objective to maximize are:
 \begin{align}
-	\text{Maximize}\hspace{1cm} & \sum\limits_{t \in \Ta} W(t, |A(t)|) = \We\\
+	\text{Maximize}\hspace{1cm} & \We = \sum\limits_{t \in \Ta} W(t, |\mathcal{A}(t)|)\\
 	\text{S. T. for all}\hspace{1cm} & i = 1\ldots|\Pl|, j = 1\ldots|\Ta|,\notag\\
-	& \sum\limits_{t \in \Ta} x(n_i, t) \leq 1\notag\\
-	& \sum\limits_{t \in \Ta \backslash C(n_i)} x(n_i, t) = 0\notag\\
-	& 0 \leq x(n_i, t_j) \leq 1\notag
+	& \sum\limits_{t \in \Ta} \xi(n_i, t) \leq 1\notag\\
+	& \sum\limits_{t \in \Ta \backslash C(n_i)} \xi(n_i, t) = 0\notag\\
+	& 0 \leq \xi(n_i, t_j) \leq 1\notag	
 \end{align}
 The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 ILP since all $x_{ij}$ can only have the value $0$ or $1$, indicating whether or not agent $i$ is assigned to target $j$.
 
@@ -980,6 +985,17 @@ It is worth reiterating at this point that both, the agents' additive noise term
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion}
+%This paper introduces a task allocation algorithm that allows to recruit an approximate number of agents with a desired variance to a task. This allows to trade-off task execution accuracy with speed, resulting in increasing collaboration rates for teams with larger variances. We demonstrate that task allocation of teams with deterministic size is a subset of the proposed stochastic task allocation mechanism. As such, the proposed framework provides a computationally simple, adaptive, and robust alternative for coordination.
+%We investigate the limitations of the proposed approach, which shows lesser fidelity in macroscopic predictions if team sizes are small. In future work, we wish to investigate the impact of variance in estimating the number of agents waiting at a collaboration site as well as the impact of unreliable communication between agents, both of which we conjecture to impact the variance of resulting team sizes in a similar way as the slope of the response threshold function. We are also interested in studying preferential attachment/detachment techniques from swarm robotic aggregation in order to improve scenarios with insufficient numbers of robots for strong teams to emerge. 
+%Results presented in this paper suggest that global games can describe a wide range of collective decision making scenarios, explaining the prevalence of sigmoid threshold strategies in natural and artificial systems. By varying noise in the system and thereby changing the slope of the sigmoid function, the response threshold strategy also allows the system to balance between exploitation and exploration. This, in turn, may lead to designing robust robot swarms that are flexible and can alter strategies for changing environmental parameters without requiring communication; a highly desired property that is often observed in natural swarms and is of great interest for engineered systems.
+
+Task allocation is a well studied problem in the fields of robotics, optimization, and game theory where a number of identical agents must be assigned to the a number of collaborative tasks for maximum system welfare. Swarm robotics in particular has tackled this problem for a number of years and many centralized, distributed, and hybrid approaches exist for solving task allocation. Practical deployment of multi-agent systems for automated surveillance, robotic firefighting, and oil-spill containment among other tasks have been proposed as a viable alternative to existing approaches and corresponding task allocation strategies for each of these applications have been analyzed but there has so far been no formal unifying definition for optimal task allocation in swarm robotics. This dissertation therefore presented a formal problem definition for multi-agent task allocation as well as a general definition of optimal task allocation as an integer linear program when all information is known about the system.
+
+The center of focus of this dissertation is a response threshold based distributed task allocation strategy. Response threshold strategies have been proposed for multi-agent task allocation since ethology research \cite{Bonabeau1996, Bonabeau1997, Bonabeau1998} provides a phenomenological argument for their simplicity and reliability in social insects. So far as I am aware, a mathematical argument for their widespread prevalence in the fields of ethology and swarm robotics has been lacking. To fill in this gap, I along with Dr. Behrouz Touri present a game theory inspired argument for their use. The widely applicable concept of concurrent benefit tasks is also defined here. This work suggests that global games can describe a wide range of collective decision making scenarios, explaining the prevalence of sigmoid threshold strategies in natural and artificial systems. By varying noise in the system and thereby changing the slope of the sigmoid function, the response threshold strategy also allows the system to balance between exploitation and exploration. This, in turn, may lead to designing robust robot swarms that are flexible and can alter strategies for changing environmental parameters without requiring communication; a highly desired property that is often observed in natural swarms and is of great interest for engineered systems.
+
+This work is followed by the actual response threshold based task allocation algorithm, itself. The algorithm allows to recruit an approximate number of agents with a desired variance to a task requiring team sizes centered around some mean magnitude value, using a logistic sigmoid function. This allows to trade-off task execution accuracy with speed, resulting in increasing collaboration rates for teams with larger variances. I demonstrate that task allocation of teams with deterministic size is a subset of the proposed stochastic task allocation mechanism. As such, the proposed framework provides a computationally simple, adaptive, and robust alternative for centralized coordination. 
+
+A centralized approach is then compared as a baseline optimum to a proposed hybrid task allocation method. While the distributed strategy for task allocation presented earlier provides a robust means of making decisions on concurrent benefit tasks, it does not plan for agents to move to tasks. The centralized optimal controller discussed earlier achieves this by taking agent and task positions into account while solving the ILP. While a centralized approach to task allocation is always optimal when provided with perfect information about the real-world system, in realistic scenarios involving agent and task constraints and imperfect sensing and communication we see that the distributed approach quickly becomes extremely useful to minimize failed task attempts and reduce wastage of resources (or maximize utility, as it is defined in the field of optimization). The results of these experiments show that when a noisy central controller is used alongside the response threshold based task allocation strategy, we see fewer attempted tasks but also a disproportionate reduction in the number of failed task attempts. In fact, the experimental data would suggest that as the central controller gets increasingly noisy data about task magnitudes, employing the a distributed approach results in an increased rate of successful task assignments. This result falls in line with predictions of an Bayesian Nash equilibrium existing when agents receive a common noisy stimulus signal and employ threshold strategies to decide whether or not to participate in the task. The results from the final chapter provide a very compelling reason to further research and extend the results provided in this dissertation.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -987,8 +1003,6 @@ It is worth reiterating at this point that both, the agents' additive noise term
 \bibliographystyle{ieeetr}		% or "plain", "siam", or "alpha", etc.
 %\nocite{*}						% list all refs in database, cited or not
 \bibliography{../refworks}
-\end{document}
-
 \end{document}
 
 
