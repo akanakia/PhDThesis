@@ -7,7 +7,7 @@
 
 % Packages for page layout
 \usepackage[vcentering,dvips]{geometry}
-\geometry{papersize={6.14in,9.21in}, top=1in, bottom=1in, left=0.75in, right=0.75in}
+\geometry{papersize={6.14in,9.21in}, top=.75in, bottom=.75in, left=0.75in, right=0.75in}
 \usepackage[pagestyles]{titlesec}
 \newpagestyle{contentStyle}{%
   \sethead{\chaptername\ \thechapter. \chaptertitle}{}{}
@@ -112,7 +112,6 @@
 
 % ------------------------------ DOCUMENT TITLE SETUP -------------------------
 \title{Response Threshold Based Task Allocation in Multi-Agent Systems Performing Concurrent Benefit Tasks with Limited Information}
-\subtitle{Ph.D. Dissertation}
 \author{Anshul Kanakia}
 \date{}
 \pagestyle{titleStyle}
@@ -377,10 +376,10 @@ where $\vec{S}$ is a state vector containing the number of agents in each state,
 \item The diagonal entries, $a_{ii}$, are equal to the negative sum of all edge probabilities $p_{n}$ leaving state $s_i$.
 \end{enumerate} 
 If an edge does not exist between two states $s_i$, $s_j$ ($i\not=j$) in the FSM, then entry $a_{ij} = 0$, e.g., the master equation for the swarm system described in Figure~\ref{fig:pfsm} is,
-\begin{equation}\label{eq:mastereqns}
+\begin{align}\label{eq:mastereqns}
 \left(
 	\begin{array}{c}N_A'(t) \\ N_B'(t) \\ N_C'(t) \\ N_D'(t)\end{array}
-\right) =
+\right) = &
 \left(
 	\begin{array}{cccc}
 	-(p_{12} + p_{13}) & p_{21} & 0 & p_{41}\\
@@ -388,9 +387,9 @@ If an edge does not exist between two states $s_i$, $s_j$ ($i\not=j$) in the FSM
 	p_{13} & p_{23} & -p_{34} & 0\\
 	0 & 0 & p_{34} & -p_{41}
 	\end{array}
-\right)
-\left(\begin{array}{c}N_A(t) \\ N_B(t) \\ N_C(t) \\ N_D(t)\end{array}\right)
-\end{equation}
+\right)\cdot\nonumber\\
+& \left(\begin{array}{c}N_A(t) \\ N_B(t) \\ N_C(t) \\ N_D(t)\end{array}\right)
+\end{align}
 
 In most of the scenarios being discussed in this paper, I assume that agents are neither removed nor added to a swarm system once an experiment has begun and therefore add the following constraints to the model,
 \begin{align}
