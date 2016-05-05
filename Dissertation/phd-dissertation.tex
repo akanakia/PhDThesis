@@ -46,7 +46,8 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage{float} % To make floats movable
-\usepackage{subcaption}
+\usepackage[font=footnotesize]{caption}
+\usepackage[font=footnotesize]{subcaption}
 \usepackage[table]{xcolor}
 
 % For cleaner citations
@@ -111,10 +112,10 @@
 \begin{document}
 
 % ------------------------------ DOCUMENT TITLE SETUP -------------------------
+\pagestyle{titleStyle}
 \title{Response Threshold Based Task Allocation in Multi-Agent Systems Performing Concurrent Benefit Tasks with Limited Information}
 \author{Anshul Kanakia}
 \date{}
-\pagestyle{titleStyle}
 \maketitle
 
 %\otherdegrees{B.S., University of Illinois at Urbana-Champaign, 2010\\
@@ -135,7 +136,22 @@
 %\readerFive{Prof.~Sriram Sankaranarayanan}
 
 %\abstract{  %\OnePageChapter	% because it is very short
-\newpage
+\chapter*{Dedication}
+I would like to dedicate this thesis to my late grandfather Mr. Manilal Kanakia (1923--2014). A self made man with humble beginnings from a small village in Gujarat, India, he ended his career as an emeritus school principal, academic, author, and editor of several Geography text books. He taught me the true meaning of patience and the invaluable skill of honest ingenuity --- maximizing benefit from the fewest resources possible.
+
+As is perhaps the norm this year of 2015, I would also like to dedicate my Thesis to the logically infallible Mr. Leonard Nimoy, a.k.a. ``Mr. Spock'' (1931--2015). His life's work will forever inspire humanity towards a utopia where we may all one day live long and prosper.
+
+\chapter*{Acknowledgments}
+I am eternally grateful to my colleagues and friends at the University of Colorado, Correll Robotics Lab. Much of my inspiration for this work has come from entertaining and enlightening conversations with my lab buddies, plus countless hours of Halo and Tetris in their company! Of course, none of this work would have been possible without the incredible mentoring of my adviser Dr. Nikolaus Correll as well as my thesis committee. Finally, I would like to confess my eternal gratitude and love for my beautiful wife, Mariah. Even though grad school kept us apart for many years your loving thoughts and enduring patience gave me all the motivation I could have asked for!
+\section*{Thesis Committee}
+\begin{itemize}
+\item Dr. Nikolaus Correll. CU Boulder, Computer Science \textbf{(Chair)}
+\item Dr. Sriram Sankaranarayanan. CU Boulder, Computer Science
+\item Dr. Ani Hsieh. Drexel University, Computer Science
+\item Dr. Behrouz Touri. CU Boulder, Electrical and Computer Engineering
+\item Dr. Gabe Sibley. CU Boulder, Computer Science
+\end{itemize}
+
 \pagestyle{titleStyle}
 \chapter*{Abstract}
 One of the most elusive but important goals of swarm robotics is to reproduce the emergent collaborative behavior observed in natural swarming systems through the use of simple decision rules. Examples of collaborative processes in insect colonies such as foraging, scouting (finding shortest paths) for food, and colony defense involve some form of task allocation among individual agents. The robustness of task completion even after major environmental changes is also observed in natural swarm systems. Ants and bees are often unphased by the fact that the magnitude of a task --- such as carrying a heavy piece of food --- is unknown to every individual and manage to complete the task elegantly even without such critical knowledge. This robustness property is of paramount importance when recreating natural behavior in artificial systems and I believe the use of decentralized agent based task allocation rules is closely related to this property. I therefore present a novel response threshold based strategy for task allocation in multi-agent systems in this dissertation. I prove, using a well known result from the theory of global games, that under the constraints of imperfect knowledge of the environment and imperfect communication response threshold based task allocation leads to an equilibrium inducing strategy for the swarm system. The importance of this result is to provide a formal mathematical basis for the phenomenological justification currently provided in the field of swarm robotics to mimic biological systems. This result therefore provides both, a hypothesis about the inner workings of a wide range of existing approaches with limited communication between agents in artificial swarm systems and also a formal explanation for threshold based task allocation in social insects. These game theory results lead to a novel continuous response threshold algorithm for multi-agent task allocation that generalizes fixed-group task allocation (stick-pulling experiment) and stochastic team size task allocation. This allows variable team sizes to form at task sites within tolerance limits thereby providing a trade-off between exploration and exploitation. The claims made by theoretical proofs for response threshold based task allocation are backed up by physical experiments using the \emph{Droplet} swarm robot platform. Further simulation experiments provide a basis of comparison between optimal centralized approaches and hybrid approaches for task allocation where each robot decides whether to participate in a task based on its own noisy sensory input and imperfect knowledge from the system controller. I show that in many real world situations it is often impractical to rely on the assumption of perfect system information for controlling a swarm and that centralized task allocation becomes comparable to a response threshold based policy under the influence of noise.
@@ -201,7 +217,6 @@ One of the most elusive but important goals of swarm robotics is to reproduce th
 \end{center}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\pagestyle{titleStyle}
 \tableofcontents
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -313,7 +328,7 @@ As alluded to earlier, the case of a state transition based on an internal timer
 				 (4) 	edge node{$c_{41}$} (1);
 		\end{scope}
 		\end{tikzpicture}
-	\caption{FSM representing a single robot controller with conditional edge transitions that depend on internal and environmental factors such as timers, sensor readings, etc. Vertices represent physical or internal states that a robot can be in.}\label{fig:fsm}
+	\caption{}\label{fig:fsm}
 	\end{subfigure}~
 	\begin{subfigure}[t]{.4\textwidth}
 		\centering\begin{tikzpicture}[->,>=triangle 45,shorten >=2pt,auto,node distance=3cm,
@@ -333,7 +348,7 @@ As alluded to earlier, the case of a state transition based on an internal timer
 				 (4) 	edge node{$p_{41}$} (1);
 		\end{scope}
 	\end{tikzpicture}
-	\caption{PFSM of a robot controller with probabilistic edge transitions derived from simple geometric properties of the system.}\label{fig:pfsm}
+	\caption{}\label{fig:pfsm}
 	\end{subfigure}
 	\begin{subfigure}[t]{.4\textwidth}
 		\centering\begin{tikzpicture}[->,>=triangle 45,shorten >=2pt,auto,node distance=3cm,
@@ -353,16 +368,16 @@ As alluded to earlier, the case of a state transition based on an internal timer
 				 (4) 	edge node{$p_{41}$} (1);
 		\end{scope}
 	\end{tikzpicture}
-	\caption{A macroscopic model for the swarm system as a whole. Vertices, $N(s_i, t)$, represent the number of robots in state $s_i$ at time $t$. Edges are still transition probabilities between states but can also be thought of as proportions of agents entering or leaving a state at time $t$.}\label{fig:pfsmmacro}
+	\caption{}\label{fig:pfsmmacro}
 	\end{subfigure}
-\caption{Transitioning from, \textbf{(a)}: micro-model FSM that describes a single robot controller, to \textbf{(c)}: macro-model PFSM that characterizes the entire swarm system.}\label{fig:allfsm}
+\caption{\textbf{(a)}: FSM representing a single robot controller with conditional edge transitions. Vertices represent physical or internal states that a robot can be in. \textbf{(b)}: PFSM of a robot controller with probabilistic edge transitions derived from simple geometric properties of the system. \textbf{(c)}: A macroscopic model for the swarm system as a whole. Vertices, $N(s_i, t)$, represent the number of robots in state $s_i$ at time $t$. Edges are still transition probabilities between states.}\label{fig:allfsm}
 \end{figure}
 
-\section{Mathematical Description of the System}
+\section{Mathematical Description of the\\System}
 Given a discrete set of states and conditions for transitions between them, usually in the form of probabilities of transition, a \emph{master equation} defines a set of coupled ODEs that describe the time evolution of a physical system. So far, I have used logical constructs like FSMs to represent the robot controller running within each individual agent of the swarm system. I could instead look as these constructs as a model for the entire system, in which case the vertices of the FSM become accumulators of robots currently in a state and the edges define fractions of agents entering or leaving a given state at time $t$. The PFSM now becomes a macroscopic definition of the robot swarm and can be used to define a mathematical model for the time evolution of the system.
 
 \begin{equation}
-\D{\vec{P}(t)} = \mathbf{A}\vec{P}(t)\label{eq:firstmaster}
+\D{\vec{P}(t)}{t} = \mathbf{A}\vec{P}(t)\label{eq:firstmaster}
 \end{equation}
 
 $\vec{P}$ is a vector containing the time-dependent probability of being in any given state in the corresponding PFSM. $\mathbf{A}$ is a matrix containing transition rates of going from state-$i$ to state-$j$ in the PFSM. When I multiply both sides of equation~\eqref{eq:firstmaster} by the total number of agents, $N_0$, I get the modified master equation that gives a macroscopic description of the system.
@@ -407,27 +422,27 @@ In swarm robotics literature, the master equation is often expanded to a set of 
 \end{equation}
 along with a set of initial conditions that define the number of robots in each state at time 0. Rate equations are the preferred method for describing a macro-model of a swarm system because, unlike the master equation, they can represent probability values that could be complex, non-linear functions of environment variables, control variables, as well as time. These are also commonly referred to as population dynamics models.
 
-\section{Microscopic Simulation of the System}
+\section{Microscopic Simulation of the\\System}
 One of the advantages of using macroscopic, mathematical models for describing robot swarms is their ability to predict the state of the system at equilibrium, if it exists. But given the phenomenological approach to designing macro-models, it may not always be intuitive to construct the math equations to accurately describe the system. Even if the rate equations are defined, the system may not be easily solvable, either analytically or numerically. Fortunately there is another modeling tool that comes to our aid in such situations. 
 
 \begin{figure}[!tb]
-\centering\includegraphics[width=15cm]{../assets/martinoliModelMethod.png}
+\centering\includegraphics[width=\textwidth]{../assets/martinoliModelMethod.png}
 \centering\caption{Gillespie simulation of a swarm system. Each controller, PPP$_i$, describes the independent behavior of a single robot in the swarm. Environmental variables are updated at the end of each iteration. (Image credit: Dr. Alcherio Martinoli)}\label{fig:micromodel}
 \end{figure}
 
 The Microscopic model (or micro-model) of a swarm system can be simulated using the \emph{Gillespie} simulation technique\cite{Gillespie1976,Gillespie1977}. Here, each agent is simulated individually using dice rolls and probability. Gillespie developed this simulation algorithm in the 1970s to model the time evolution of reactant and product volumes in a chemical reaction. The individual agents in his chemical system were single molecules of the reactant and the micro-model was derived from the dynamics of molecule interactions. The probability of two reactant molecules colliding was computed using simple physical properties such as the radius and velocity of the molecules in the reaction medium\cite{Gillespie1976}. Gillespie's original modeling approach has been modified for use with swarm systems, here. Martinoli outlines this process in detail in chapter 4.2 of his Ph.D. dissertation\cite{Martinoli1999b}. Robots with PFSM controllers are used instead of product and reactant molecules as the fundamental units of the simulation. First one step of the simulation, all robots are picked in a random order and their PFSMs are run in parallel for a single time-step. The state of the entire system is then updated and the process repeats itself for a pre-determined length of time. Unlike in the original version of Gillespie simulation where time-step lengths between reactions are also chosen at random, here we preset the length of time that passes between two steps of the simulation. 
 
-\section{Verification of System Properties Using Real Experiments and Physics-Based Simulation}
+\section{Verification of System Properties Using Real Experiments and\\Physics-Based Simulation}
 \begin{figure}[!tb]
 \begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/Webots.png}
-\centering\caption{The Webots simulator rendering a game of robot soccer.}\label{fig:webots}
+\centering\includegraphics[width=\textwidth]{../assets/Webots.png}
+\centering\caption{}\label{fig:webots}
 \end{subfigure}~
 \begin{subfigure}{.5\textwidth}
-\centering\includegraphics[width=6.5cm]{../assets/newsim.png}
-\centering\caption{The Droplet swarm robot simulator}\label{fig:dropletsim}
+\centering\includegraphics[width=\textwidth]{../assets/newsim.png}
+\centering\caption{}\label{fig:dropletsim}
 \end{subfigure}
-\caption{Swarm robot simulators.}
+\caption{\textbf{(a)} The Webots simulator rendering a game of robot soccer. \textbf{(b)} The Droplet swarm robot simulator.}
 \end{figure}
 
 An important step in any modeling process is validation by comparing model results to real experiment data. Given the relatively abstract approach applied so far for designing swarm robot models, this step is made even more crucial. The micro and macro-models in swarm robotics have conventionally been designed using observed phenomena from other processes seen in biological and chemical systems and adapted to fit the swarming task being studied. Many swarm algorithms show emergent behavior where the observation of complex properties at the system level cannot be trivially inferred from studying the individual agent behavior. The generalizations and simplifications made in the robot controller design when developing the micro and macro-models can, and in many cases do, suppress the interesting emergent properties seen in real physical systems. 
@@ -513,7 +528,7 @@ The following example describes a cooperative game with target thresholds and pl
 	\centering\caption{A cooperative game with 4 players and 3 targets. Gray pegs indicate the target's minimum threshold value while the arrows depict player assignment constraints.}\label{fig:ex1}
 \end{figure}
 
-\section{Defining Optimality for Multi-Agent Task Allocation}\label{sec:optimaldef}
+\section{Defining Optimality for\\Multi-Agent Task Allocation}\label{sec:optimaldef}
 Consider a simplified forest firefighting scenario where a number of isolated fires and flame fronts exist in a specified geographic region. Our goal is to contain all of the fires and prevent them from spreading or, at the very least, contain as many as we can given our manpower. If the fires did not evolve over time and we had perfect information about the threshold value of each target/fire then a central controller would only have to maximize Eq.~\eqref{eq:ilp} and provide the resulting assignment matrix to all the agents. The agents would then move to their assigned fires. Since Eq.~\eqref{eq:ilp} guarantees successful assignments (if such an assignment is possible) there would be enough robots at each fire to put it out and all the tasks would be complete. 
 
 Clearly this situation --- like most real world situations --- is dynamic, i.e., the size and number of fires changes over time. The task allocation model described in the previous section has no notion of time. We consider constant but repeated optimization of \textit{snapshots} of a dynamic problem so that at any given point a solution to the TA problem is valid. The main assumption made here is that maximizing Eq.~\eqref{eq:ilp} takes considerably less time than the physical evolution of the task magnitudes, and in-turn, the task thresholds. If this is not the case or if, for any other reason, the state of the system is not updated in a central controller then this notion of optimality quickly fails.
@@ -521,7 +536,7 @@ Clearly this situation --- like most real world situations --- is dynamic, i.e.,
 Nevertheless, maximizing snapshots of a MATA system with perfect information throughout the course of a prescribed scenario provides a means for defining baseline system-wide optimality. At any given point in time, the optimal solution of a snapshot of the state of the system is the best assignment of targets that agents can be given.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Existence of an Equilibrium Strategy for Communication-Free Multi-Robot Task Assignment$^*$}\blfootnote{$^*$ I would like to thank Dr. Behrouz Touri for his extensive help on the theory of global games and in formulating and proving the theorems mentioned in this chapter. The use of the article ``we'' in this chapter serves to remind the reader of the extent our my collaboration with Dr. Touri.}\label{ch:existeqrtm}
+\chapter{Existence of an Equilibrium Strategy for Communication Free Multi-Robot Task Assignment}\blfootnote{I would like to thank Dr. Behrouz Touri for his extensive help on the theory of global games and in formulating and proving the theorems mentioned in this chapter. The use of the article ``we'' in this chapter serves to remind the reader of the extent our my collaboration with Dr. Touri.}\label{ch:existeqrtm}
 \chaptermark{Existence of Equilibrium Strategy}
 A number of different methods exist for TA in MAS such as deterministic leader-follower coalition algorithms \cite{Chen2011} and more complex market-based approaches \cite{Amstutz2008} to simpler probabilistic algorithms for individually simplistic agents \cite{Dantu2012}. As mentioned earlier, the reason that we focus so heavily on the RT model is it's widespread use in ethology research for modeling social insects. While this phenomenological evidence provides a solid incentive for their use in engineered robotic systems, there has so far been no mathematical argument for their use. In this chapter we provide --- for what we believe to be the first time in the field of swarm robotics --- a mathematical explanation for their prevalence using a well known result from game theory. The problem of TA in MAS is formulated as a global game and two theorems are subsequently proved showing the existence of a Bayes Nash Equilibrium in a system using DRTs (Theorem 1) and, subsequently, CRTs (Theorem 2) for TA in MAS. Theorem 2 also analytically shows how Gaussian noise in perceiving stimulus signals leads to sigmoid RTs, as are commonly observed in nature.
 
@@ -571,7 +586,7 @@ BR(S_{-i})(x)&=\tilde{s}(x)\in\argmax{a_i\in A_i} E(u_i(a_i,g,\tau)\mid x_i=x)\\
 \end{align}
 where $E(\cdot|\cdot)$ is the conditional expectation of $u_i$ given the $i^{\text{th}}$ agent's observation. The best response of player $i$ simply is the best course of action for agent $i$ given that the strategies of the other players is given. Indeed the expression $\argmax{a_i\in A_i} E(u_i(a_i,g,\tau)\mid x_i=x)$ is the (set of) best actions that player $i$ can take given its information, the aggregate action $g$ of the other players, and the intensity $\tau$. Note that given the $i^{\text{th}}$ agent's observation $x_i$, the observations of the other agents, and hence their actions, would be random from the $i^{\text{th}}$ agent perspective, i.e. given $x_i$ and $\tau$, all $s \in S_{-i}$ are effectively random variables with respect to the $i^{\text{th}}$ agent. A strategy profile $S=\{s_1,\ldots,s_n\}$ is a \emph{sensible strategy}, if it leads to a BNE \cite{Fudenberg1998}, given $s_i=BR(S_{-i})$ for all $i\in \{1,\ldots,n\}$. 
 
-\section{Communication-free threshold-based Task Allocation Strategy}\label{sec:discretethreshold}
+\section{Communication Free Threshold\\Based Task Allocation Strategy}\label{sec:discretethreshold}
 Any task with concurrent benefit admits a threshold strategy BNE --- meaning it is sufficient for the agents to follow a simple algorithm: 
 \begin{enumerate}[(i)]
 \item Compare your noisy measurement $x_i$ to a threshold value $\td_i$,
@@ -627,7 +642,7 @@ For a concurrent benefit task $T$, suppose that the stimulus parameter $\tau$ is
 By Lemma 1, the best response of a threshold strategy is a threshold strategy and hence, it induces the mapping $L$ from the space of thresholds $\R^n$ to itself. Also, by Lemma~\ref{lemma:continuous}, this mapping is a continuous mapping. Now, if $\td_i$ is a sufficiently large threshold, then the second property of concurrent benefit tasks implies that the $\tilde{\td}_i\leq \td_i$ because a large enough measurement $x_i$ implies that agent $i$ itself should take part in the task. Similarly, for sufficiently low threshold $\td_i$, we will have $\tilde{\td}_i\geq \td_i$. Therefore, the mapping $L$ maps a box $[a,b]^n$ to itself, where $a$ is a sufficiently small scalar and $b>a$ is a sufficiently large scalar. Since the box $[a,b]^n$ is a convex closed set, by the Brouwer's fix point theorem \cite{Border1990} we have that there exists a vector of threshold values $\alpha^*$ such that $\alpha^*=L(\alpha^*)$ and hence, there exists a BNE for the concurrent benefit task $T$.
 \end{proof}
 
-\section{From discrete thresholds to sigmoidal response functions}\label{sec:continuous}
+\section{From Discrete Thresholds to\\Sigmoidal Response Functions}\label{sec:continuous}
 Observations in ethology suggest sigmoid threshold functions \cite{Bonabeau1996}, rather than fixed thresholds as suggested by our analysis. Also, roboticists have started using sigmoid-shaped threshold functions to engineer swarm systems \cite{Bonabeau1996,Theraulaz1998,Krieger2000}, as tuning the shape of a sigmoidal response threshold function allows balancing between exploration, i.e., performing a random action, and exploitation, i.e., using all available information in decision making such as a fixed threshold. 
 We argue that this behavior can be a direct result of using a simple discrete threshold under the influence of perception noise. Indeed, one can show that a sigmoid threshold function is the outcome of deterministic threshold functions on noisy observations. Suppose that all  agents share the same utility function $u(a_i,g,\tau)$ and also, assume that the observation noise of the $n$ agents ($\eta_1,\ldots,\eta_n$) are independent and identically distributed (IID) $\mathcal{N}(0,\sigma^2)$ Gaussian random variables. Then, it is not hard to see that there exists a BNE with threshold strategies that have the same threshold value $\td$ \cite{Morris2000}.
 
@@ -965,7 +980,7 @@ Recalling the ILP constraints and objective to maximize are:
 The first condition ensures that all agents get assigned to at most one target. The second condition accounts for each agent's target constraints $c_i$ and essentially locks in the value of $x_{ij} = 0$ for all $t_j \not\in c_i$. The final constraint makes this optimization problem a 0-1 ILP since all $x_{ij}$ can only have the value $0$ or $1$, indicating whether or not agent $i$ is assigned to target $j$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Distributed Response Threshold based Task Allocation}
+\section{Distributed Response Threshold\\based Task Allocation}
 \begin{figure}[!ht]
 \centering\includegraphics[width=.5\columnwidth]{../assets/DistributedController.png}
 \centering\caption{This flowchart describes the control flow for an indiviaul agent's controller in the de-centralized RT based optimal assignment method.}\label{fig:distcontrol}
